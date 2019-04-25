@@ -1,0 +1,20 @@
+# This file should contain everything to configure the workflow on a global scale.
+# In case of sample based data, it should be complemented by a samples.tsv file that contains
+# one row per sample. It can be parsed easily via pandas.
+
+idndslimits:
+    maxarea:
+        - 2.5
+    minarea:
+        - 0.02
+    step:
+        - 0.25
+
+patient:
+    - PD31182
+
+metadata:
+    oesophagus:
+        - data/oesophagus/donorinfo.csv
+    skin:
+        - data/skin/donorinfo.csv
