@@ -8,7 +8,7 @@ rule CalculatedNdSNormal:
         oesophagusdndsgenes="results/oesophagus/dnds_genes.csv",
         skindnds="results/skin/dnds.csv",
         skindndsgenes="results/skin/dnds_genes.csv",
-        oesophagusdndsneutral="results/esophagus/dnds_neutral.csv",
+        oesophagusdndsneutral="results/oesophagus/dnds_neutral.csv",
         oesophagusdndsgenesneutral="results/oesophagus/dnds_genes_neutral.csv",
         singlepatientdnds="results/dataforfigures/{input.singlepatient}_bins.csv",
         singlepatientdndsgenes="results/dataforfigures/{input.singlepatient}_bins_genes.csv"
@@ -23,7 +23,7 @@ rule CalculatedNdSNormal:
     shell:
         """
         Rscript R/Rule2-CalculatedNdS-normal.R \
-        --oesophaguspatientinfo {input.oesophaguspatientinfo} \
+        --patientinfo {input.oesophaguspatientinfo} \
         --oesophagusdata {input.oesophagusdata} \
         --skindata {input.skindata} \
         --oesophagusdnds {output.oesophagusdnds} \

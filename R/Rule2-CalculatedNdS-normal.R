@@ -62,7 +62,7 @@ i <- 1
 
 message("Calculate global and per gene i-dN/dS per patient")
 for (p in unique(df$donor)){
-  message(paste0("Analysing patient", p, "(patient ", i / length(unique(df$donor)) ")"))
+  message(paste0("Analysing patient ", p, "(patient ", i, "/", length(unique(df$donor)), " )"))
   for (cutoff in areacutoff){
     message(paste0("Max area is ", cutoff))
     x1 <- df %>%
@@ -78,10 +78,9 @@ for (p in unique(df$donor)){
     out2 <- combined %>%
       mutate(areacutoff = cutoff, patient = p)
     dfdnds.genes.patient <- rbind(dfdnds.genes.patient, out2)
-    message(x$globaldnds)
-    message(" ")
   }
-  i + i +1
+  message("\n")
+  i <- i + 1
 }
 
 message("Write output to file")
@@ -121,8 +120,6 @@ for (cutoff in areacutoff){
     out2 <- combined %>%
       mutate(areacutoff = cutoff)
     dfdnds.genes <- rbind(dfdnds.genes, out2)
-    message(x$globaldnds)
-    message("")
 }
 
 message("Write i-dN/dS for neutral genes to file.")
@@ -176,7 +173,7 @@ df <- read_csv(args$skindata)
 data("dataset_normalskin_genes", package="dndscv")
 target_genes
 
-minarea <- args$minarea
+minarea <- args$minarea + 0.01
 maxarea <- args$maxarea
 step <- args$step
 areacutoff <- seq(minarea, maxarea, step)
@@ -185,7 +182,7 @@ dfdnds.patient <- data.frame()
 dfdnds.genes.patient <- data.frame()
 i <- 1
 for (p in unique(df$patient)){
-    message(paste0("Analysing patient", p, "(patient ", i / length(unique(df$donor)) ")"))
+  message(paste0("Analysing patient ", p, "(patient ", i, "/", length(unique(df$patient)), " )"))
     for (cutoff in areacutoff){
         message(paste0("Max area is ", cutoff))
         x1 <- df %>%
@@ -201,10 +198,9 @@ for (p in unique(df$patient)){
         out2 <- combined %>%
           mutate(areacutoff = cutoff, patient = p)
         dfdnds.genes.patient <- bind_rows(dfdnds.genes.patient, out2)
-        message(x$globaldnds)
-        message(" ")
   }
-  i + i +1
+  message("\n")
+  i <- i + 1
 }
 
 message("Write skin i-dN/dS values to file")
