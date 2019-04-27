@@ -20,4 +20,5 @@ rule all:
 
 include: "rules/Rule1-ModellingNormalTissue.smk"
 include: "rules/Rule2-CalculatedNdS-normal.smk"
+include: "rules/fitdNdSnormal.smk"
 include: "rules/GenerateFigures.smk"

@@ -10,8 +10,8 @@ rule CalculatedNdSNormal:
         skindndsgenes="results/skin/dnds_genes.csv",
         oesophagusdndsneutral="results/oesophagus/dnds_neutral.csv",
         oesophagusdndsgenesneutral="results/oesophagus/dnds_genes_neutral.csv",
-        singlepatientdnds="results/dataforfigures/{input.singlepatient}_bins.csv",
-        singlepatientdndsgenes="results/dataforfigures/{input.singlepatient}_bins_genes.csv"
+        singlepatientdnds="results/dataforfigures/singlepatient_bins.csv",
+        singlepatientdndsgenes="results/dataforfigures/singlepatient_bins_genes.csv"
     params:
         singlepatient=config["patient"],
         step=config["idndslimits"]["step"],
@@ -37,5 +37,5 @@ rule CalculatedNdSNormal:
         --singlepatientdndsgenes {output.singlepatientdndsgenes} \
         --step {params.step} \
         --minarea {params.minarea} \
-        --maxarea {params.maxarea}  2>> {log.out} 1>> {log.err}
+        --maxarea {params.maxarea}  #2>> {log.out} 1>> {log.err}
         """

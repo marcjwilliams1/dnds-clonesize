@@ -6,7 +6,7 @@ library(GenomicRanges)
 library(readr)
 library(argparse)
 
-parser <- ArgumentParser(description = "Cluster SCE with CellAssign")
+parser <- ArgumentParser(description = "Calculate dN/dS normal")
 parser$add_argument('--patientinfo', type='character',
                     help="Patient info xlsx file")
 parser$add_argument('--oesophagusdata', type='character',

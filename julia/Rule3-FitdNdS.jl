@@ -12,6 +12,8 @@ s = ArgParseSettings()
         help = "Oesophagus dnds values"
     "--oesophagusdndsdatagenes"
         help = "Oesophagus dnds values per gene"
+    "--oesophagusdndsneutral"
+        help = "Oesophagus dnds values"
     "--oesophagusmetadata"
         help = "Information on patient ages etc"
     "--skindndsdata"
@@ -20,6 +22,24 @@ s = ArgParseSettings()
         help = "Oesophagus dnds values per gene"
     "--skinmetadata"
         help = "Information on patient ages etc"
+    "--oesophagusfitmissense"
+        help = "Fits for oesophagus missense mutations"
+    "--oesophagusfitnonsense"
+        help = "Fits for oesophagus nonsense mutations"
+    "--oesophagusfitmissensepergene"
+        help = "Fits for oesophagus missense mutations per gene"
+    "--oesophagusfitnonsensepergene"
+        help = "Fits for oesophagus nonsense mutations per gene"
+    "--skinfitmissense"
+        help = "Fits for oesophagus missense mutations"
+    "--skinfitnonsense"
+        help = "Fits for skin nonsense mutations"
+    "--skinfitmissensepergene"
+        help = "Fits for oesophagus missense mutations per gene"
+    "--skinfitnonsensepergene"
+        help = "Fits for skin nonsense mutations per gene"
+    "--oesophagusfitneutral"
+        help = "Fits for oesophagus neutral genes"
 end
 
 parsed_args = parse_args(ARGS, s)
@@ -102,10 +122,8 @@ end
 @rput myDFnon
 R"""
 library(readr)
-
-write_csv(myDFmiss, "FinalFigures/data_for_figures/esophagus_dnds_missense.csv")
-write_csv(myDFnon, "FinalFigures/data_for_figures/esophagus_dnds_nonsense.csv")
-
+write_csv(myDFmiss, $(parsed_args["oesophagusfitmissense"]))
+write_csv(myDFnon, $(parsed_args["oesophagusfitnonsense"]))
 """;
 
 DF = CSV.File(parsed_args["oesophagusdndsdatagenes"]) |> DataFrame
@@ -191,11 +209,11 @@ end
 @rput myDFnon
 R"""
 library(readr)
-write_csv(myDFmiss, "FinalFigures/data_for_figures/esophagus_dnds_missense_pergene.csv")
-write_csv(myDFnon, "FinalFigures/data_for_figures/esophagus_dnds_nonsense_pergene.csv")
+write_csv(myDFmiss, $(parsed_args["oesophagusfitmissensepergene"]))
+write_csv(myDFnon, $(parsed_args["oesophagusfitnonsensepergene"]))
 """;
 
-DF = CSV.File("data/esophagus/dnds_combined_neutral.csv") |> DataFrame
+DF = CSV.File(args["oesophagusdndsneutral"]) |> DataFrame
 DF[:A] = 2 * DF[:areacutoff];
 
 DFpatient = filter(row -> row[:name] == "wall", DF)
@@ -205,8 +223,7 @@ x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = 70.0, Amin = 0.14,
 allmutations = x.DF
 @rput allmutations
 R"""
-library(readr)
-write_csv(allmutations, "FinalFigures/data_for_figures/esophagus_dnds_allmutations_neutral.csv")
+write_csv(myDFmiss, $(parsed_args["oesophagusfitneutral"]))
 """;
 
 
@@ -214,8 +231,8 @@ write_csv(allmutations, "FinalFigures/data_for_figures/esophagus_dnds_allmutatio
 # Skin data
 #########################################################
 
-DFdonor = CSV.read("data/skin/donorinfo.csv");
-DFcohort = CSV.read("data/skin/dnds_patient_combined.csv");
+DFdonor = CSV.read(parsed_args["skinmetadata"]);
+DFcohort = CSV.read(parsed_args["skindndsdata"]);
 DFcohort[:A] = DFcohort[:areacutoff];
 patient = unique(DFcohort[:patient])
 
@@ -289,9 +306,8 @@ end
 @rput myDFnon
 R"""
 library(readr)
-
-write_csv(myDFmiss, "FinalFigures/data_for_figures/skin_dnds_missense.csv")
-write_csv(myDFnon, "FinalFigures/data_for_figures/skin_dnds_nonsense.csv")
+write_csv(myDFmiss, $(parsed_args["skinfitmissense"]))
+write_csv(myDFnon, $(parsed_args["skinfitnonsense"]))
 """;
 
 DF = CSV.File("data/skin/dnds_patient_genes_combined.csv") |> DataFrame
@@ -362,6 +378,6 @@ end
 @rput myDFmiss
 @rput myDFnon
 R"""
-write_csv(myDFmiss, "FinalFigures/data_for_figures/skin_dnds_missense_pergene.csv")
-write_csv(myDFnon, "FinalFigures/data_for_figures/skin_dnds_nonsense_pergene.csv")
+write_csv(myDFmiss, $(parsed_args["skinfitmissensepergene"]))
+write_csv(myDFnon, $(parsed_args["skinfitnonsensepergene"]))
 """

@@ -8,7 +8,7 @@ idndslimits:
     minarea:
         - 0.02
     step:
-        - 0.25
+        - 0.02
 
 patient:
     - PD31182
