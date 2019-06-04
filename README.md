@@ -13,5 +13,8 @@ This is a snakemake workflow to reproduce figures from "Measuring the distributi
 3. Make a dry-run to ensure that the pipeline will compile ```snakemake -n```
 4. Run the pipeline with ```snakemake``` adding additional options if you want to run on a cluster (recommended). See the snakemake docs for this.
 
+## Singularity
+To come....
+
 ## Jupyter notebooks
-Also included are jupyter notebooks for each of the main steps. These are perhaps easier to parse than the pipeline if you're interested in looking at how a particular analysis was done.
+Also included are jupyter notebooks in the `notebooks/` folder for each of the main steps. These are perhaps easier to parse than the pipeline if you're interested in looking at how a particular analysis was done.

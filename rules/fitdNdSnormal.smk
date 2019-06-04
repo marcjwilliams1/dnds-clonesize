@@ -17,8 +17,6 @@ rule fitdNdSnormal:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
         skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral.csv"
-    # params:
-    #     x = "tes"
     log:
         out = "logs/fitdNdS-normal.out",
         err = "logs/fitdNdS-normal.err"
