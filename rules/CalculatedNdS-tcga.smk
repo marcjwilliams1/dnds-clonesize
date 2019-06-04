@@ -7,15 +7,13 @@ rule CalculatedNdSTCGA:
         dndscvref="data/dndscv/RefCDS_human_GRCh38.p12.rda"
     output:
         dndsclonality="results/TCGA/dndsclonality.csv",
+        vafclonality="results/TCHA/VAFclonality.csv",
         dndsclonality_percancertype="results/TCGA/dndsclonality_percancertype.csv",
         intervaldnds="results/TCGA/intervaldnds.csv",
-        numberofgenes="results/TCGA/numberofgenes.csv",
-        skindnds="results/skin/dnds.csv",
-        skindndsgenes="results/skin/dnds_genes.csv",
-        oesophagusdndsneutral="results/oesophagus/dnds_neutral.csv",
-        oesophagusdndsgenesneutral="results/oesophagus/dnds_genes_neutral.csv",
-        singlepatientdnds="results/dataforfigures/singlepatient_bins.csv",
-        singlepatientdndsgenes="results/dataforfigures/singlepatient_bins_genes.csv"
+        nmutations_gene="results/TCGA/nmutations_gene.csv",
+        nmutations_gene_percancertype="results/TCGA/nmutations_gene_percancertype.csv",
+        baseline="results/TCGA/baseline.csv",
+        baseline_validation="results/TCGA/baseline_validate.csv",
     params:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
@@ -26,23 +24,17 @@ rule CalculatedNdSTCGA:
     shell:
         """
         Rscript R/CalculatedNdS-TCGA.R \
-        --data {input.tcgadata} \
-        --drivergenelist {input.drivergenelist} \
-        --essentialgenelist {input.essentialgenelist} \
-        --allgenes {input.allgenes} \
-        --dndscvref {input.dndscvref} \
-        --oesophagusdata {input.oesophagusdata} \
-        --skindata {input.skindata} \
-        --oesophagusdnds {output.oesophagusdnds} \
-        --oesophagusdndsgenes {output.oesophagusdndsgenes} \
-        --skindnds {output.skindnds} \
-        --skindndsgenes {output.skindndsgenes} \
-        --oesophagusdndsneutral {output.oesophagusdndsneutral} \
-        --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
-        --singlepatient {params.singlepatient} \
-        --singlepatientdnds {output.singlepatientdnds} \
-        --singlepatientdndsgenes {output.singlepatientdndsgenes} \
-        --step {params.step} \
-        --minarea {params.minarea} \
-        --maxarea {params.maxarea}  #2>> {log.out} 1>> {log.err}
+            --data {input.tcgadata} \
+            --drivergenelist {input.drivergenelist} \
+            --essentialgenelist {input.essentialgenelist} \
+            --allgenes {input.allgenes} \
+            --dndscvref {input.dndscvref} \
+            --baseline {output.baseline} \
+            --baseline_validation {output.baseline_validation} \
+            --vafclonality {output.vafclonality} \
+            --dndsclonality {output.dndsclonality} \
+            --dndsclonality_percancertype {output.dndsclonality_percancertype} \
+            --intervaldnds {output.intervaldnds} \
+            --nmutations_gene {output.nmutations_gene} \
+            --nmutations_gene_percancertype {output.nmutations_gene_percancertype} #2>> {log.out} 1>> {log.err}
         """
