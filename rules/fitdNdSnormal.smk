@@ -23,20 +23,20 @@ rule fitdNdSnormal:
     shell:
         """
         julia julia/FitdNdS.jl \
-        --oesophagusdndsdata {input.oesophagusdnds} \
-        --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
-        --oesophagusdndsneutral {input.oesophagusdndsneutral} \
-        --oesophagusmetadata {input.oesophagusmetadata} \
-        --skindndsdata {input.skindnds} \
-        --skindndsdatagenes {input.skindndsgenes} \
-        --skinmetadata {input.skinmetadata} \
-        --oesophagusfitmissense {output.oesophagusfitmissense} \
-        --oesophagusfitnonsense {output.oesophagusfitnonsense} \
-        --skinfitmissense {output.skinfitmissense} \
-        --skinfitnonsense {output.skinfitnonsense} \
-        --oesophagusfitmissensepergene {output.oesophagusfitmissensepergene} \
-        --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
-        --skinfitmissensepergene {output.skinfitmissensepergene} \
-        --skinfitnonsensepergene {output.skinfitnonsensepergene} \
-        --oesophagusfitneutral {output.oesophagusfitneutral} 2>> {log.out} 1>> {log.err}
+            --oesophagusdndsdata {input.oesophagusdnds} \
+            --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
+            --oesophagusdndsneutral {input.oesophagusdndsneutral} \
+            --oesophagusmetadata {input.oesophagusmetadata} \
+            --skindndsdata {input.skindnds} \
+            --skindndsdatagenes {input.skindndsgenes} \
+            --skinmetadata {input.skinmetadata} \
+            --oesophagusfitmissense {output.oesophagusfitmissense} \
+            --oesophagusfitnonsense {output.oesophagusfitnonsense} \
+            --skinfitmissense {output.skinfitmissense} \
+            --skinfitnonsense {output.skinfitnonsense} \
+            --oesophagusfitmissensepergene {output.oesophagusfitmissensepergene} \
+            --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
+            --skinfitmissensepergene {output.skinfitmissensepergene} \
+            --skinfitnonsensepergene {output.skinfitnonsensepergene} \
+            --oesophagusfitneutral {output.oesophagusfitneutral} 2>> {log.out} 1>> {log.err}
         """

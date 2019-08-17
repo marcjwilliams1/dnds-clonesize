@@ -12,7 +12,7 @@ report: "report/workflow.rst"
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; ")
 
-figs=[1,2,3,4]
+figs=[1,2,3,4,5]
 
 rule all:
     input:
@@ -22,5 +22,6 @@ rule all:
 include: "rules/Rule1-ModellingNormalTissue.smk"
 include: "rules/Rule2-CalculatedNdS-normal.smk"
 include: "rules/fitdNdSnormal.smk"
-include: "rules/GenerateFigures.smk"
 include: "rules/CalculatedNdS-tcga.smk"
+include: "rules/ModellingCancer.smk"
+include: "rules/GenerateFigures.smk"

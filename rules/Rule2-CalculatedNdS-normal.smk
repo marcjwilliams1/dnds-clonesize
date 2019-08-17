@@ -23,19 +23,19 @@ rule CalculatedNdSNormal:
     shell:
         """
         Rscript R/Rule2-CalculatedNdS-normal.R \
-        --patientinfo {input.oesophaguspatientinfo} \
-        --oesophagusdata {input.oesophagusdata} \
-        --skindata {input.skindata} \
-        --oesophagusdnds {output.oesophagusdnds} \
-        --oesophagusdndsgenes {output.oesophagusdndsgenes} \
-        --skindnds {output.skindnds} \
-        --skindndsgenes {output.skindndsgenes} \
-        --oesophagusdndsneutral {output.oesophagusdndsneutral} \
-        --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
-        --singlepatient {params.singlepatient} \
-        --singlepatientdnds {output.singlepatientdnds} \
-        --singlepatientdndsgenes {output.singlepatientdndsgenes} \
-        --step {params.step} \
-        --minarea {params.minarea} \
-        --maxarea {params.maxarea}  #2>> {log.out} 1>> {log.err}
+            --patientinfo {input.oesophaguspatientinfo} \
+            --oesophagusdata {input.oesophagusdata} \
+            --skindata {input.skindata} \
+            --oesophagusdnds {output.oesophagusdnds} \
+            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
+            --skindnds {output.skindnds} \
+            --skindndsgenes {output.skindndsgenes} \
+            --oesophagusdndsneutral {output.oesophagusdndsneutral} \
+            --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
+            --singlepatient {params.singlepatient} \
+            --singlepatientdnds {output.singlepatientdnds} \
+            --singlepatientdndsgenes {output.singlepatientdndsgenes} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}  #2>> {log.out} 1>> {log.err}
         """

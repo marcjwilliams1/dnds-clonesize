@@ -72,7 +72,7 @@ rule Figure3:
 
 rule Figure4:
     input:
-        tcgadata="data/TCGA-combined-hg38.csv",
+        vafclonality="results/TCHA/VAFclonality.csv",
         dndsclonality_percancertype="results/TCGA/dndsclonality_percancertype.csv",
         dndsclonality="results/TCGA/dndsclonality.csv",
         baseline="results/TCGA/baseline.csv",
@@ -84,8 +84,35 @@ rule Figure4:
         Rscript R/Figure4.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
-            --tcgadata {input.tcgadata} \
+            --tcgadata {input.vafclonality} \
             --baseline {input.baseline} \
             --dndsclonality_percancertype {input.dndsclonality_percancertype} \
             --dndsclonality {input.dndsclonality}
+        """
+
+rule Figure5:
+    input:
+        intervaldnds="results/TCGA/intervaldnds.csv",
+        nmutations_gene="results/TCGA/nmutations_gene.csv",
+        nmutations_gene_percancertype="results/TCGA/nmutations_gene_percancertype.csv",
+        syntheticcohort_power="results/dataforfigures/syntheticcohort_power.csv",
+        syntheticcohort="results/dataforfigures/syntheticcohort.csv",
+        syntheticcohort_diffmu="results/dataforfigures/syntheticcohort_diffmu.csv",
+        drivergenelist="data/genelists/Driver_gene_list_198_Science_Review.txt",
+    output:
+        figure="Figures/Figure5.pdf",
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [5])
+    shell:
+        """
+        Rscript R/Figure5.R \
+            --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
+            --nmutations_gene {input.nmutations_gene} \
+            --nmutations_gene_percancertype {input.nmutations_gene_percancertype} \
+            --intervaldNdSsim {input.syntheticcohort} \
+            --intervaldNdSsimmu {input.syntheticcohort_diffmu} \
+            --intervaldNdSsimpower {input.syntheticcohort_power} \
+            --intervaldNdStcga {input.intervaldnds} \
+            --drivers {input.drivergenelist}
+
         """
