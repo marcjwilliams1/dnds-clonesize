@@ -12,10 +12,11 @@ report: "report/workflow.rst"
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; ")
 
+figs=[1,2,3,4]
+
 rule all:
     input:
-        fig1 = "Figures/Figure1.pdf",
-        fig2 = "Figures/Figure2.pdf"
+        expand("Figures/Figure{FIG}.pdf", FIG = figs)
 
 
 include: "rules/Rule1-ModellingNormalTissue.smk"
