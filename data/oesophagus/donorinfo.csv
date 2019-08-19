@@ -1,0 +1,10 @@
+patient,Age,Age2,Agecategory,Sez,Ethnicity,Smokinghistory,Smokinghistory_packyears,Alcoholintakehistory,BMI,Antirefluxmedication,Diabetes,Cancerhistory,Nsamples
+PD36806,20-23,21.5,Young,M,White,Never smoker,0,Yes - 2U/day,24.97,None,No but family history,None,84
+PD36712,24-27,25.5,Young,F,White,Current -10/day (10years),5 (moderate),Rarely,29.39,None,None,None,93
+PD30272,36-39,37.5,Young,F,White,Never smoker,0,Yes - 3-4 glasses/ week,24.77,None,None,None,96
+PD30986,44-47,45.5,Middle-aged,M,White,Current - 15/day (30 years),22.5 (heavy),Minimal,30.42,None,No but family history,None,94
+PD30987,48-51,49.5,Middle-aged,M,White,Current - 1/day (32 years),1.6 (moderate),Rarely,25.35,None,None,None,95
+PD30274,52-55,53.5,Middle-aged,M,White,Never smoker,0,Rarely,31.38,None,No but family history,None,98
+PD30988,56-59,57.5,Middle-aged,F,White,Current - 15/day (40 years),30 (heavy),No,30.78,None,No but family history,None,95
+PD30273,68-71,69.5,Elderly,M,White,Never smoker,0,Occasionally,29.39,None,None,None,95
+PD31182,72-75,73.5,Elderly,M,White,Never smoker,0,Rarely,22.49,None,None,None,94
