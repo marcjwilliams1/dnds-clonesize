@@ -1,0 +1,3 @@
+WorkflowError in line 22 of /data/BCI-EvoCa2/marc/dnds/dnds-clonesize/Snakefile:
+Failed to open /data/BCI-EvoCa2/marc/dnds/dnds-clonesize/rules/Rule1-ModellingNormalTissue.smk.
+  File "/data/BCI-EvoCa2/marc/dnds/dnds-clonesize/Snakefile", line 22, in <module>
