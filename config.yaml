@@ -10,6 +10,8 @@ idndslimits:
     step:
         - 0.02
 
+log_dir: "logs"
+
 patient:
     - PD31182
 
