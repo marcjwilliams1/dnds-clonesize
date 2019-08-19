@@ -100,19 +100,17 @@ rule Figure5:
         syntheticcohort_diffmu="results/dataforfigures/syntheticcohort_diffmu.csv",
         drivergenelist="data/genelists/Driver_gene_list_198_Science_Review.txt",
     output:
-        figure="Figures/Figure5.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [5])
+        figure="Figures/Figure5.pdf"
     shell:
         """
         Rscript R/Figure5.R \
             --figure {output.figure} \
-            --suppfigures {output.suppfigures} \
             --nmutations_gene {input.nmutations_gene} \
             --nmutations_gene_percancertype {input.nmutations_gene_percancertype} \
             --intervaldNdSsim {input.syntheticcohort} \
             --intervaldNdSsimmu {input.syntheticcohort_diffmu} \
             --intervaldNdSsimpower {input.syntheticcohort_power} \
             --intervaldNdStcga {input.intervaldnds} \
-            --drivers {input.drivergenelist}
+            --drivergenelist {input.drivergenelist}
 
         """
