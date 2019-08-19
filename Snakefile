@@ -18,9 +18,9 @@ rule all:
     input:
         expand("Figures/Figure{FIG}.pdf", FIG = figs)
 
-
-include: "rules/Rule1-ModellingNormalTissue.smk"
-include: "rules/Rule2-CalculatedNdS-normal.smk"
+include: "rules/downloadTCGA.smk"
+include: "rules/ModellingNormalTissue.smk"
+include: "rules/CalculatedNdS-normal.smk"
 include: "rules/fitdNdSnormal.smk"
 include: "rules/CalculatedNdS-tcga.smk"
 include: "rules/ModellingCancer.smk"
