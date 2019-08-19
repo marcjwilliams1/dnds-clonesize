@@ -6,6 +6,7 @@ rule Figure1:
         figure="Figures/Figure1.pdf"
     shell:
         """
+        module load R
         Rscript R/Figure1.R \
             --figure {output.figure}
         """
@@ -30,6 +31,7 @@ rule Figure2:
         figure="Figures/Figure2.pdf"
     shell:
         """
+        module load R
         Rscript R/Figure2.R \
             --figure {output.figure} \
             --oesophagusfitmissense {input.oesophagusfitmissense} \
@@ -61,6 +63,7 @@ rule Figure3:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [1,2,3,4])
     shell:
         """
+        module load R
         Rscript R/Figure3.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
@@ -81,6 +84,7 @@ rule Figure4:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [5])
     shell:
         """
+        module load R
         Rscript R/Figure4.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
@@ -103,6 +107,7 @@ rule Figure5:
         figure="Figures/Figure5.pdf"
     shell:
         """
+        module load R
         Rscript R/Figure5.R \
             --figure {output.figure} \
             --nmutations_gene {input.nmutations_gene} \

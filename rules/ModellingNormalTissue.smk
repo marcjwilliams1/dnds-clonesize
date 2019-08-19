@@ -4,13 +4,12 @@ rule ModellingNormalTissue:
         stemcellpower="results/dataforfigures/stemcell_simulation_power.csv"
     params:
         nsamples = 5
-    log:
-        out = "logs/Rule1-ModellingNormalTissue.out",
-        err = "logs/Rule1-ModellingNormalTissue.err"
     shell:
         """
+        module load R
+        module load julia
         julia julia/ModellingNormalTissue.jl \
         --examplefitsout {output.stemcellexamplefit} \
         --powerout {output.stemcellpower} \
-        --nsamples {params.nsamples} 2>> {log.out} 1>> {log.err}
+        --nsamples {params.nsamples}
         """

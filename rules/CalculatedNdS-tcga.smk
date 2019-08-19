@@ -18,11 +18,10 @@ rule CalculatedNdSTCGA:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
-    log:
-        out = "logs/CalculatedNdS-TCGA.out",
-        err = "logs/CalculatedNdS-TCGA.err"
     shell:
         """
+        module load R
+        module load julia
         Rscript R/CalculatedNdS-TCGA.R \
             --data {input.tcgadata} \
             --drivergenelist {input.drivergenelist} \
@@ -36,5 +35,5 @@ rule CalculatedNdSTCGA:
             --dndsclonality_percancertype {output.dndsclonality_percancertype} \
             --intervaldnds {output.intervaldnds} \
             --nmutations_gene {output.nmutations_gene} \
-            --nmutations_gene_percancertype {output.nmutations_gene_percancertype} #2>> {log.out} 1>> {log.err}
+            --nmutations_gene_percancertype {output.nmutations_gene_percancertype}
         """

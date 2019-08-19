@@ -23,3 +23,4 @@ scripts/.snakemake*
 !.test
 data/TCGA-combined-hg38.csv
 final_notebooks/data/
+GDCdata/

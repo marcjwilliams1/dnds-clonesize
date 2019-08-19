@@ -17,11 +17,10 @@ rule fitdNdSnormal:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
         skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral.csv"
-    log:
-        out = "logs/fitdNdS-normal.out",
-        err = "logs/fitdNdS-normal.err"
     shell:
         """
+        module load R
+        module load julia
         julia julia/FitdNdS.jl \
             --oesophagusdndsdata {input.oesophagusdnds} \
             --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
@@ -38,5 +37,5 @@ rule fitdNdSnormal:
             --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
             --skinfitmissensepergene {output.skinfitmissensepergene} \
             --skinfitnonsensepergene {output.skinfitnonsensepergene} \
-            --oesophagusfitneutral {output.oesophagusfitneutral} 2>> {log.out} 1>> {log.err}
+            --oesophagusfitneutral {output.oesophagusfitneutral}
         """

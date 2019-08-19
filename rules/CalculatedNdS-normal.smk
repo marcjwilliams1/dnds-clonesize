@@ -17,11 +17,10 @@ rule CalculatedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
-    log:
-        out = "logs/Rule2-CalculatedNdS-normal.out",
-        err = "logs/Rule2-CalculatedNdS-normal.err"
     shell:
         """
+        module load R
+        module load julia
         Rscript R/CalculatedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -37,5 +36,5 @@ rule CalculatedNdSNormal:
             --singlepatientdndsgenes {output.singlepatientdndsgenes} \
             --step {params.step} \
             --minarea {params.minarea} \
-            --maxarea {params.maxarea}  #2>> {log.out} 1>> {log.err}
+            --maxarea {params.maxarea}
         """
