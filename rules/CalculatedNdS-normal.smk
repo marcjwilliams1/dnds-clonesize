@@ -22,7 +22,7 @@ rule CalculatedNdSNormal:
         err = "logs/Rule2-CalculatedNdS-normal.err"
     shell:
         """
-        Rscript R/Rule2-CalculatedNdS-normal.R \
+        Rscript R/CalculatedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
             --skindata {input.skindata} \

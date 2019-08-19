@@ -9,7 +9,7 @@ rule ModellingNormalTissue:
         err = "logs/Rule1-ModellingNormalTissue.err"
     shell:
         """
-        julia julia/Rule1-ModellingNormalTissue.jl \
+        julia julia/ModellingNormalTissue.jl \
         --examplefitsout {output.stemcellexamplefit} \
         --powerout {output.stemcellpower} \
         --nsamples {params.nsamples} 2>> {log.out} 1>> {log.err}
