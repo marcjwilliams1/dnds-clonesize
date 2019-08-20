@@ -11,8 +11,6 @@ parser$add_argument('--CNVfile', type='character',
                     help="TCGA CNV file hg38")
 parser$add_argument('--ascatcellularity', type='character',
                     help="Ascat cellularity file")
-parser$add_argument('--outputfile', type='character',
-                    help="Ascat cellularity file")
 args <- parser$parse_args()
 
 #get all TCGA cancer subtype codes
