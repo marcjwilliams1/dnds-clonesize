@@ -1,16 +1,21 @@
-rule downloadTCGA:
-    input:
-        ascatfile="data/ascat_acf_ploidy.tsv"
+rule downloadTCGASNV:
     output:
         maffile="data/TCGA-MAF.csv",
+    shell:
+        """
+        module load R
+        Rscript R/downloadTCGASNV.R \
+            --MAFfile {output.maffile}
+        """
+
+rule downloadTCGACNV:
+    output:
         cnvfile="data/TCGA-CNV.csv"
     shell:
         """
         module load R
-        Rscript R/downloadTCGA.R \
-            --MAFfile {output.maffile} \
-            --CNVfile {output.cnvfile} \
-            --ascatcellularity {input.ascatfile}
+        Rscript R/downloadTCGACNV.R \
+            --CNVfile {output.cnvfile}
         """
 
 rule combineTCGA:

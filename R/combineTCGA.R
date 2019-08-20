@@ -50,16 +50,8 @@ cellularity <- read.delim(args$ascatcellularity, header = T) %>%
   select(-Sample) %>%
   dplyr::rename(ploidy = Ploidy, cellularity = Aberrant_Cell_Fraction.Purity.)
 
- message("Combine all file types")
- dfsnv <- dfhg38 %>%
-    dplyr::mutate(VAF = t_alt_count/t_depth) %>%
-    dplyr::rename(chr = Chromosome, start = Start_Position, end = End_Position) %>%
-    dplyr::select(sampleid, chr, start, end, Reference_Allele, Tumor_Seq_Allele2, VAF,
-                  t_depth, t_ref_count, t_alt_count, n_depth,
-                  n_ref_count, n_alt_count, cancertype) %>%
-    dplyr::mutate(nref = str_length(Reference_Allele), nalt = str_length(Tumor_Seq_Allele2)) %>%
-    dplyr::mutate(mutation_type = ifelse((nref - nalt) == 0, "SNV", "INS/DEL")) %>%
-    dplyr::select(-nref, -nalt)
+message("Combine all file types")
+dfsnv <- dfhg38
 
 #dfsnv <- dfhg38
 df1temp <- left_join(dfsnv, cellularity, by = c("sampleid")) %>%

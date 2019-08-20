@@ -8,6 +8,13 @@ __default__:
 
 downloadTCGA:
     time: "24:00:00"
+    mem: 10G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+combineTCGA:
+    time: "2:00:00"
     mem: 50G
     resources: "\"span[hosts=1]\""
     output: "{config[log_dir]}/{rule}.out"
@@ -16,6 +23,13 @@ downloadTCGA:
 GenerateFigures:
     time: "1:00:00"
     mem: 1G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+ModellingCancer:
+    time: "5:00:00"
+    mem: 16G
     resources: "\"span[hosts=1]\""
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"

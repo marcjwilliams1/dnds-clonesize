@@ -175,6 +175,7 @@ dfp = DFp[DFp[:VAF] .> 0.01, :]
 @rput dfp
 @rput dfd
 
+println("Fitting in R...")
 # we'll move over to R to fit the data and make the plot using popgendnds
 R"""
 ccfmin <- 0.01
@@ -206,7 +207,6 @@ write_csv(dnds, $(parsed_args["syntheticcohort_diffmu"]))
 
 
 println("Power calculations")
-
 Random.seed!(123)
 mup = 0.005
 Nmax =  10^5
@@ -259,6 +259,7 @@ dfp = DFp[DFp[:VAF] .> 0.01, :]
 @rput dfp
 @rput dfd
 
+println("Fitting in R...")
 # we'll move over to R to fit the data and make the plot using popgendnds
 R"""
 

@@ -8,7 +8,7 @@ idndslimits:
     minarea:
         - 0.02
     step:
-        - 0.02
+        - 0.05
 
 log_dir: "logs"
 
@@ -20,3 +20,5 @@ metadata:
         - data/oesophagus/donorinfo.csv
     skin:
         - data/skin/donorinfo.csv
+
+nsamplesnormal: 100
