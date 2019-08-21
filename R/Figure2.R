@@ -12,6 +12,8 @@ library(argparse)
 parser <- ArgumentParser(description = "Generate Final Figures")
 parser$add_argument('--figure', type='character',
                     help="Outpute figure files")
+parser$add_argument('--suppfigures', type='character',
+                    help="Outpute figure files", nargs = "+", default = NULL)
 parser$add_argument('--oesophagusfitmissense', type='character',
                     help="Fits for missense mutations oesophagus")
 parser$add_argument('--oesophagusfitnonsense', type='character',
@@ -30,6 +32,8 @@ parser$add_argument('--stemcellpower', type='character',
                     help="Simulations for power to infer dynamics")
 parser$add_argument('--stemcellexamplefit', type='character',
                     help="Example simulations fits")
+parser$add_argument('--singlepatientdnds', type='character',
+                    help="Single patient dn/ds in bins")
 args <- parser$parse_args()
 
 message("Generating Figure 2...")
@@ -45,6 +49,9 @@ dfneutral <- read_csv(args$oesophagusfitneutral, col_types = cols())
 
 dfsim <- read.csv(args$stemcellexamplefit)
 dfpower <- read_csv(args$stemcellpower, col_types = cols())
+
+dfbins <- read_csv(args$singlepatientdnds) %>%
+mutate(A = medianbin)
 
 
 message("Summarise data...")
@@ -218,3 +225,30 @@ figure2 <- plot_grid(figure2top, figure2bottom, ncol = 1)
 
 message("Save plot to file")
 save_plot(args$figure, figure2, base_height = 7, base_width = 12)
+
+message("Plot single patient")
+
+g1 <- dfbins %>%
+    filter(name == "wmis") %>%
+    ggplot(aes(y = mle, x = A)) +
+    geom_point() +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    geom_linerange(aes(ymin = cilow, ymax = cihigh)) +
+    scale_x_log10(breaks = unique(dfbins$medianbin), labels = unique(dfbins$vafbin)) +
+    xlab("Clone area bin") + ylab("dN/dS Missense") +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+g2 <- dfbins %>%
+    filter(name == "wnon") %>%
+    ggplot(aes(y = mle, x = A)) +
+    geom_point() +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    geom_linerange(aes(ymin = cilow, ymax = cihigh)) +
+    scale_x_log10(breaks = unique(dfbins$medianbin), labels = unique(dfbins$vafbin)) +
+    xlab("Clone area bin") + ylab("dN/dS Nonsense") +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+g <- plot_grid(g1, g2)
+save_plot(filename = args$suppfigures[1], g, base_height = 6, base_width = 10)

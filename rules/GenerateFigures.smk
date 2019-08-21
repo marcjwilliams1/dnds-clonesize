@@ -1,7 +1,4 @@
 rule Figure1:
-    log:
-        out = "logs/fitdNdS-normal.out",
-        err = "logs/fitdNdS-normal.err"
     output:
         figure="Figures/Figure1.pdf"
     shell:
@@ -21,16 +18,17 @@ rule Figure2:
         skinfitnonsense = "results/dataforfigures/skinfitnonsense.csv",
         oesophagusfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene.csv",
         oesophagusfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
-        #skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
-        #skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
+        singlepatientdnds="results/dataforfigures/singlepatient_bins.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral.csv"
     output:
-        figure="Figures/Figure2.pdf"
+        figure="Figures/Figure2.pdf",
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [1])
     shell:
         """
         module load R
         Rscript R/Figure2.R \
             --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
             --oesophagusfitmissense {input.oesophagusfitmissense} \
             --oesophagusfitnonsense {input.oesophagusfitnonsense} \
             --skinfitmissense {input.skinfitmissense} \
@@ -39,7 +37,8 @@ rule Figure2:
             --oesophagusfitnonsensepergene {input.oesophagusfitnonsensepergene} \
             --oesophagusfitneutral {input.oesophagusfitneutral} \
             --stemcellexamplefit {input.stemcellexamplefit} \
-            --stemcellpower {input.stemcellpower}
+            --stemcellpower {input.stemcellpower} \
+            --singlepatient {input.singlepatientdnds}
         """
 
 rule Figure3:
@@ -127,9 +126,12 @@ rule Figure5:
         syntheticcohort="results/dataforfigures/syntheticcohort.csv",
         syntheticcohort_diffmu="results/dataforfigures/syntheticcohort_diffmu.csv",
         drivergenelist="data/genelists/Driver_gene_list_198_Science_Review.txt",
+        syntheticcohort_fmin="results/dataforfigures/syntheticcohort_fmin.csv",
+        syntheticcohort_inferreds="results/dataforfigures/syntheticcohort_inferreds.csv",
+        baselinevalidation="results/TCGA/baseline_validate.csv",
     output:
         figure="Figures/Figure5.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [8])
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [8,9,11])
     shell:
         """
         module load R
@@ -142,6 +144,8 @@ rule Figure5:
             --intervaldNdSsimmu {input.syntheticcohort_diffmu} \
             --intervaldNdSsimpower {input.syntheticcohort_power} \
             --intervaldNdStcga {input.intervaldnds} \
-            --drivergenelist {input.drivergenelist}
-
+            --drivergenelist {input.drivergenelist} \
+            --fmin {input.syntheticcohort_fmin} \
+            --inferreds {input.syntheticcohort_inferreds} \
+            --baselinevalidation {input.baselinevalidation}
         """

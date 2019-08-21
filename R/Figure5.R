@@ -27,6 +27,12 @@ parser$add_argument('--nmutations_gene_percancertype', type='character',
                     help="Number of mutations per gene per cancertype")
 parser$add_argument('--drivergenelist', type='character',
                     help="driver gene list")
+parser$add_argument('--fmin', type='character',
+                    help="Data showing effect of minimum frequency")
+parser$add_argument('--inferreds', type='character',
+                    help="Data showing ability to infer s")
+parser$add_argument('--baselinevalidation', type='character',
+                    help="Data for baseline validation plot")
 args <- parser$parse_args()
 
 message("Generating Figure 5...")
@@ -229,3 +235,90 @@ gnonInt <- dfdndsInt %>%
 
 gInt <- cowplot::plot_grid(gmissInt, gnonInt, ncol = 2, align = T, labels = c("a", "b"))
 save_plot(args$suppfigures[1], gInt, base_height = 3.5, base_width = 7)
+
+
+message("plot the effect of minimum frequency in dN/dS calculations")
+
+dndsfmin <- read_csv(args$fmin, col_types = cols())
+inferreds <- read_csv(args$inferreds, col_types = cols())
+
+g1 <- dndsfmin %>%
+    mutate(fminlab = paste0("fmin = ", fmin)) %>%
+    mutate(fminlab = case_when(
+        fmin == 0.0 ~ "All mutations",
+        fmin == 0.01 ~ "CCF > 0.01",
+        fmin == 0.05 ~ "CCF > 0.05"
+            )
+    ) %>%
+    filter(simulationset == 3) %>%
+    ggplot2::ggplot(ggplot2::aes(x = CCF, y = dnds)) +
+    ggplot2::geom_point(col = "firebrick4") +
+    ggplot2::geom_line(ggplot2::aes(y = dndsth), alpha = 0.5, size = 1.5, alpha = 0.8) +
+    ggplot2::ylab("Interval \n dN/dS") + ggplot2::xlab(expression(f[max])) +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    xlab(expression(f[max])) +
+    ylab("Interval dN/dS") +
+    #scale_fill_hue(l=40) +
+    background_grid(major = "xy", minor = "none") +
+    facet_wrap(~fminlab) +
+    ylim(c(0, 2.5)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+g2 <- inferreds %>%
+    mutate(fmin = paste0(fmin)) %>%
+    ggplot(aes(x = fmin, y = s)) +
+    geom_boxplot(width = 0.3, alpha = 0.3, col = "steelblue4", fill = "steelblue4") +
+    geom_sina(col = "steelblue4") +
+    ylim(c(-1, 2)) +
+    geom_hline(yintercept = 0.25, lty = 2) +
+    ylab("Infered selection coefficient") +
+    #xlab(expression(f[min])) +
+    xlab("") +
+    annotate("text", x = "0", y = 0.5, label = "True s", size = 4) +
+    scale_x_discrete(labels = c("All mutations", "CCF > 0.01",
+                               "CCF > 0.05")) +
+    coord_flip()
+
+dndslim <- function(fmin, fmax, N, s){
+    a <- N^(s / (1+s))
+    b <- gamma((2+s) / (1+s))
+    b2 <- (1+s) ^ 2
+    c <- fmin ^ (-1 / (1+s)) - fmax ^ (-1 / (1+s))
+    d <- (1/fmin) - (1/fmax)
+    #print(b)
+
+    return(a * (c/d))
+}
+
+N <- 100
+fmin <- seq(1,N,1) / N
+idnds <- dndslim(fmin, N, N, 0.5)
+
+df <- data.frame(fmin = fmin, idnds = idnds)
+
+g3 <- df %>%
+    ggplot(aes(x = fmin, y = idnds)) +
+    geom_line(col = "firebrick4") +
+    scale_x_reverse() +
+    xlab(expression(f[min])) +
+    ylab("Interval dN/dS") +
+    geom_hline(yintercept = 1.0, lty = 2)
+
+g <- plot_grid(g1, g2, g3, ncol = 3, rel_widths = c(1.0, 1), labels = c("a", "b", "c"))
+save_plot(args$suppfigures[2], g, base_height = 3.5, base_width = 14)
+
+
+message("Baseline validation")
+df <- read_csv(args$baselinevalidation,col_types = cols())
+dndsplot <- df %>%
+    filter(name == "wmis" | name == "wnon") %>%
+    mutate(name = ifelse(name == "wmis", "Missense", "Nonsense")) %>%
+    ggplot(aes(x = name, y = mle)) +
+    geom_sina(col = "firebrick4") +
+    geom_boxplot(alpha = 0.1, width = 0.2, fill = "firebrick4") +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    xlab("") +
+    ylab("dN/dS") +
+    ylim(c(0.8, 1.2))
+
+save_plot(args$suppfigures[3], dndsplot, base_width = 5, base_height = 5)

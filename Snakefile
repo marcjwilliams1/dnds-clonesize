@@ -13,7 +13,7 @@ shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; ")
 
 figs=[1,2,3,4,5]
-suppfigs=[2,3,4,5,6,7]
+suppfigs=[1,2,3,4,5,6,7,8,9,10,11]
 
 rule all:
     input:

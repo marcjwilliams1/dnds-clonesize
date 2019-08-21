@@ -104,7 +104,7 @@ library(dndscv)
 library(Hmisc)
 dndsrandom <- data.frame()
 
-for (i in 1:10){
+for (i in 1:50){
     print(i)
     randomgenestemp <- read.table(args$allgenes, header = TRUE) %>%
         filter(!V1 %in% cellessential$V1, !V1 %in% drivers$V1) %>%
@@ -124,7 +124,7 @@ baseline
 # generate an additional 100 random samples and ensure mean is 1
 dndsrandom2 <- data.frame()
 
-for (i in 1:10){
+for (i in 1:50){
     print(i)
     randomgenestemp <- read.table(args$allgenes, header = TRUE) %>%
         filter(!V1 %in% cellessential$V1, !V1 %in% drivers$V1) %>%
