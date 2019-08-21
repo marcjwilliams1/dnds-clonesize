@@ -198,3 +198,34 @@ message("Generate final figure")
 gtemp <- cowplot::plot_grid(gsim, gsummary, ncol = 2, align = T, labels = c("a", "b"), rel_widths = c(1, 1.3))
 gInt <- plot_grid(gtemp, ghitchhike, ncol = 1, labels = c("", "c"))
 save_plot(args$figure, gInt, base_height = 10, base_width = 10)
+
+
+
+message("Interval dN/dS TCGA figure")
+
+gmissInt <- dfdndsInt %>%
+    filter(name == "wmis", mutationtype ==  "drivers") %>%
+    ggplot(aes(x = MCN, y = mle, ymin = cilow, ymax = cihigh)) +
+    geom_point(size = 2, col = "plum4") +
+    geom_linerange(col = "plum4") +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    background_grid(major = "xy", minor = "none") +
+    ylab("Interval dN/dS - Missense") + xlab(expression(f[max])) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ylim(c(0.8, 2.0)) +
+    ggtitle("TCGA")
+
+gnonInt <- dfdndsInt %>%
+    filter(name == "wnon", mutationtype ==  "drivers") %>%
+    ggplot(aes(x = MCN, y = mle, ymin = cilow, ymax = cihigh)) +
+    geom_point(size = 2, col = "plum4") +
+    geom_linerange(col = "plum4") +
+    geom_hline(yintercept = 1.0, lty = 2) +
+    background_grid(major = "xy", minor = "none") +
+    ylab("Interval dN/dS - Nonsense") + xlab(expression(f[max])) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ylim(c(0.8, 5.0)) +
+    ggtitle("TCGA")
+
+gInt <- cowplot::plot_grid(gmissInt, gnonInt, ncol = 2, align = T, labels = c("a", "b"))
+save_plot(args$suppfigures[1], gInt, base_height = 3.5, base_width = 7)

@@ -128,12 +128,14 @@ rule Figure5:
         syntheticcohort_diffmu="results/dataforfigures/syntheticcohort_diffmu.csv",
         drivergenelist="data/genelists/Driver_gene_list_198_Science_Review.txt",
     output:
-        figure="Figures/Figure5.pdf"
+        figure="Figures/Figure5.pdf",
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [8])
     shell:
         """
         module load R
         Rscript R/Figure5.R \
             --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
             --nmutations_gene {input.nmutations_gene} \
             --nmutations_gene_percancertype {input.nmutations_gene_percancertype} \
             --intervaldNdSsim {input.syntheticcohort} \
