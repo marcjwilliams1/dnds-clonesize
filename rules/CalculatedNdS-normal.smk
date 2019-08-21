@@ -38,3 +38,28 @@ rule CalculatedNdSNormal:
             --minarea {params.minarea} \
             --maxarea {params.maxarea}
         """
+
+rule MakeFilesSSB:
+    output:
+        directory("results/oesophagus/SSBfiles/{oes_sample}/")
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+    params:
+        singlepatient=config["patient"],
+        step=config["idndslimits"]["step"],
+        minarea=config["idndslimits"]["minarea"],
+        maxarea=config["idndslimits"]["maxarea"]
+    shell:
+        """
+        module load R
+        module load julia
+        Rscript R/SSB-dNdS-files.R \
+            --patientinfo {input.oesophaguspatientinfo} \
+            --oesophagusdata {input.oesophagusdata} \
+            --outputdir {output} \
+            --sample {wildcards.oes_sample} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+        """

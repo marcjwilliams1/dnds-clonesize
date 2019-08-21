@@ -82,3 +82,10 @@ FigureS6:
     resources: "\"span[hosts=1]\""
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
+
+MakeFilesSSB:
+    time: "1:00:00"
+    mem: 2G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.{wildcards.oes_sample}.out"
+    error: "{config[log_dir]}/{rule}.{wildcards.oes_sample}.out"
