@@ -21,4 +21,9 @@ metadata:
     skin:
         - data/skin/donorinfo.csv
 
+#number of times to resample the simulations
 nsamplesnormal: 100
+
+#filtering parameters for oesophagus and skin data
+mutationcutoff: 7
+rsqcutoff: 0.6

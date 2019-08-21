@@ -24,9 +24,6 @@ rule Figure2:
         #skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
         #skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral.csv"
-    log:
-        out = "logs/fitdNdS-normal.out",
-        err = "logs/fitdNdS-normal.err"
     output:
         figure="Figures/Figure2.pdf"
     shell:
@@ -55,9 +52,9 @@ rule Figure3:
         skinfitnonsense = "results/dataforfigures/skinfitnonsense.csv",
         oesophagusfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene.csv",
         oesophagusfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
-    log:
-        out = "logs/fitdNdS-normal.out",
-        err = "logs/fitdNdS-normal.err"
+    params:
+        mutationcutoff=config["mutationcutoff"],
+        rsqcutoff=config["rsqcutoff"]
     output:
         figure="Figures/Figure3.pdf",
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [1,2,3,4])
@@ -70,8 +67,10 @@ rule Figure3:
             --oesophagusfitmissense {input.oesophagusfitmissense} \
             --oesophagusfitnonsense {input.oesophagusfitnonsense} \
             --oesophagusfitmissensepergene {input.oesophagusfitmissensepergene} \
-            --oesophagusfitnonsensepergene {input.oesophagusfitnonsensepergene}
-        """
+            --oesophagusfitnonsensepergene {input.oesophagusfitnonsensepergene} \
+            --mutationcutoff {params.mutationcutoff} \
+            --rsqcutoff {params.rsqcutoff}
+         """
 
 rule Figure4:
     input:

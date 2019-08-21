@@ -1,5 +1,7 @@
 using CancerSeqSim
 using DataFrames
+using Pkg
+Pkg.build("RCall")
 using RCall
 using ProgressMeter
 using Distributions

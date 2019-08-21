@@ -22,6 +22,10 @@ parser$add_argument('--oesophagusfitmissensepergene', type='character',
                     help="Fits for missense mutations oesophagus per gene")
 parser$add_argument('--oesophagusfitnonsensepergene', type='character',
                     help="Fits for nonsense mutations oesophagus per gene")
+parser$add_argument('--mutationcutoff', type='double',
+                    help="Only plot genes with at least this number of mutations")
+parser$add_argument('--rsqcutoff', type='double',
+                    help="Only plot genes with an rsq fit greater than this")
 args <- parser$parse_args()
 
 message("Generating Figure 3...")
@@ -31,7 +35,7 @@ dfnon <- read_csv(args$oesophagusfitnonsense, col_types = cols())
 dfmiss <- read_csv(args$oesophagusfitmissense, col_types = cols())
 
 dfnon.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
-dfmiss.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
+dfmiss.gene <- read_csv(args$oesophagusfitmissensepergene, col_types = cols())
 
 message("Combine data frames...")
 dfcombined <- bind_rows(mutate(dfmiss.gene, mutationtype = "Missense"),
@@ -42,7 +46,7 @@ library(ggforce)
 DFresults <- dfcombined %>%
     group_by(gene, mutationtype, deltafit, nmutations, deltafitlq, deltafituq) %>%
     summarise(rsq = first(rsq)) %>%
-    filter(rsq > 0.6, nmutations > 7) %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n()) %>% filter(n > 1)
 
 message("Summarise per gene values...")
@@ -81,7 +85,7 @@ message("Plot DFE...")
 DFresults <- dfcombined %>%
     group_by(gene, mutationtype, deltafit, nmutations, deltafitlq, deltafituq) %>%
     summarise(rsq = first(rsq)) %>%
-    filter(rsq > 0.6, nmutations > 7) %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n())
 
 DFEmiss <- DFresults %>%
@@ -223,7 +227,7 @@ missenseperpatient <- dfmiss %>%
     distinct(patient, Age, Age2, deltafit, deltafitlq, deltafituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > 0.6) %>%
+    filter(rsq > args$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = deltafit)) +
     geom_bar(stat = "identity", fill = "darkolivegreen", width = 0.5) +
     geom_text(aes(label = barlab), y = 0.008, parse = T) +
@@ -241,7 +245,7 @@ nonsenseperpatient <- dfnon %>%
     distinct(patient, Age, Age2, lambdarfit, lambdarfitlq, lambdarfituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > 0.7) %>%
+    filter(rsq > args$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = lambdarfit)) +
     geom_bar(stat = "identity", fill = "darkslategrey", width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq)) +
@@ -256,7 +260,7 @@ missenseperpatient <- dfmiss %>%
     distinct(patient, Age, Age2, lambdarfit, lambdarfitlq, lambdarfituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > 0.7) %>%
+    filter(rsq > args$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = lambdarfit)) +
     geom_bar(stat = "identity", fill = "darkolivegreen", width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq)) +
@@ -275,15 +279,16 @@ save_plot(args$suppfigures[2], finalplot, base_height = 7, base_width = 10)
 
 
 message("plot all per patient per gene fits")
-
+message("\tCreating text annotations")
 textdf <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 9, mutationtype == "Missense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
+message("\tCreating plots")
 gmiss <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 7, mutationtype == "Missense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "plum4") +
@@ -294,13 +299,13 @@ gmiss <- dfcombined %>%
     geom_text(data = textdf, aes(label = label, y = y), x = 3.0, size = 5, parse = TRUE)
 
 textdf <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 9, mutationtype == "Nonsense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Nonsense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
 gnon <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 7, mutationtype == "Nonsense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Nonsense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "darkseagreen4") +
@@ -322,7 +327,7 @@ glambda <- dfcombined %>%
     mutate(plab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
     mutate(plab = fct_reorder(plab, Age2)) %>%
-    filter(rsq > 0.6, lambdarfit < 40.0, nmutations > 7) %>%
+    filter(rsq > args$rsqcutoff, lambdarfit < 40.0, nmutations > args$mutationcutoff) %>%
     ggplot(aes(x = gene, y = lambdarfit, fill = mutationtype, group = mutationtype)) +
     geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single"), width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq),
@@ -341,7 +346,7 @@ gdelta <- dfcombined %>%
     mutate(plab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
     mutate(plab = fct_reorder(plab, Age2)) %>%
-    filter(rsq > 0.6, nmutations > 7) %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
     ggplot(aes(x = gene, y = deltafit, fill = mutationtype)) +
     geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single"), width = 0.5) +
     geom_linerange(aes(ymin = deltafitlq, ymax = deltafituq),

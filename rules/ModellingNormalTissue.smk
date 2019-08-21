@@ -6,7 +6,7 @@ rule ModellingNormalTissue:
         nsamples = config["nsamplesnormal"]
     shell:
         """
-        module load R
+        module load R/3.5.3
         module load julia
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
         julia julia/ModellingNormalTissue.jl \

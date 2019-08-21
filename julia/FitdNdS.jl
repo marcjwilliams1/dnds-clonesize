@@ -1,5 +1,6 @@
 println("Hello")
-
+using Pkg
+Pkg.build("RCall")
 using CSV
 using DataFrames
 using ArgParse
@@ -83,7 +84,7 @@ for p in DFdonor[:patient]
         continue
     end
     age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
-    x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = age, Amin = 2 * 0.0075, ρ = 5000.0)
+    x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
     x.DF[:patient] = p
     x.DF[:Age] = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
     x.DF[:Age2] = age
@@ -107,7 +108,7 @@ for p in DFdonor[:patient]
         continue
     end
     age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
-    x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = age, Amin = 2 * 0.0075, ρ = 5000.0)
+    x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
     x.DF[:patient] = p
     x.DF[:Age] = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
     x.DF[:Age2] = age
@@ -156,15 +157,15 @@ for gene in unique(DF[:gene_name])
     DFgene = filter(row -> row[:gene_name] == gene, DF);
     println("Analysing missense mutations")
     for p in DFdonor[:patient]
-        println("Analysing patient $p")
         DFpatient = filter(row -> row[:patient] == p, DFgene);
         age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
 
         nmuts = DFpatient[:n_syn][end] + DFpatient[:n_mis][end]
-        if nmuts < 7
-            println("Only $(nmuts) mutations, moving to next patient")
+        if nmuts < 5
+            println("Patient $p, only $(nmuts) mutations, moving to next patient")
             continue
         end
+        println("Analysing patient $p, $(nmuts) mutations")
 
         x = LLoptimizationresults(DFpatient[:wmis_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
         x.DF[:patient] = p
@@ -188,7 +189,7 @@ for gene in unique(DF[:gene_name])
         age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
 
         nmuts = DFpatient[:n_syn][end] + DFpatient[:n_non][end]
-        if nmuts < 7
+        if nmuts < 5
             println("Only $(nmuts) mutations, moving to next patient")
             continue
         end
@@ -208,6 +209,9 @@ for gene in unique(DF[:gene_name])
         push!(patientvec, p)
     end
 end
+
+println("Number of fits missense: $(length(unique(myDFmiss[:gene])))")
+println("Number of fits nonsense: $(length(unique(myDFnon[:gene])))")
 
 @rput myDFmiss
 @rput myDFnon

@@ -33,3 +33,45 @@ ModellingCancer:
     resources: "\"span[hosts=1]\""
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
+
+fitdNdSnormal:
+    time: "1:00:00"
+    mem: 10G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure1:
+    time: "00:30:00"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure2:
+    time: "00:30:00"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure3:
+    time: "00:30:00"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure4:
+    time: "00:30:00"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure5:
+    time: "00:30:00"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
