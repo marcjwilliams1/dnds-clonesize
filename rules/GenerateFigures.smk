@@ -48,8 +48,6 @@ rule Figure3:
         stemcellpower="results/dataforfigures/stemcell_simulation_power.csv",
         oesophagusfitmissense = "results/dataforfigures/oesophagusfitmissense.csv",
         oesophagusfitnonsense = "results/dataforfigures/oesophagusfitnonsense.csv",
-        skinfitmissense = "results/dataforfigures/skinfitmissense.csv",
-        skinfitnonsense = "results/dataforfigures/skinfitnonsense.csv",
         oesophagusfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene.csv",
         oesophagusfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
     params:
@@ -57,7 +55,7 @@ rule Figure3:
         rsqcutoff=config["rsqcutoff"]
     output:
         figure="Figures/Figure3.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [1,2,3,4])
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [2,3,4,5])
     shell:
         """
         module load R
@@ -72,6 +70,33 @@ rule Figure3:
             --rsqcutoff {params.rsqcutoff}
          """
 
+
+rule FigureS6:
+    input:
+        skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
+        skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
+        skinfitmissense = "results/dataforfigures/skinfitmissense.csv",
+        skinfitnonsense = "results/dataforfigures/skinfitnonsense.csv",
+    output:
+        figure="Figures/FigureS6.pdf",
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [10])
+    params:
+        mutationcutoff=config["mutationcutoff"],
+        rsqcutoff=config["rsqcutoff"]
+    shell:
+        """
+        module load R
+        Rscript R/FigureS6.R \
+            --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
+            --skinfitmissense {input.skinfitmissense} \
+            --skinfitnonsense {input.skinfitnonsense} \
+            --skinfitmissensepergene {input.skinfitmissensepergene} \
+            --skinfitnonsensepergene {input.skinfitnonsensepergene} \
+            --mutationcutoff {params.mutationcutoff} \
+            --rsqcutoff {params.rsqcutoff}
+        """
+
 rule Figure4:
     input:
         vafclonality="results/TCHA/VAFclonality.csv",
@@ -80,7 +105,7 @@ rule Figure4:
         baseline="results/TCGA/baseline.csv",
     output:
         figure="Figures/Figure4.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [5])
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [7])
     shell:
         """
         module load R
