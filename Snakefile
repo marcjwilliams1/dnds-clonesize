@@ -13,10 +13,12 @@ shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; ")
 
 figs=[1,2,3,4,5]
+suppfigs=[2,3,4,5,6,7]
 
 rule all:
     input:
-        expand("Figures/Figure{FIG}.pdf", FIG = figs)
+        expand("Figures/Figure{FIG}.pdf", FIG = figs),
+        expand("Figures/FigureS{FIG}.pdf", FIG = suppfigs)
 
 include: "rules/downloadTCGA.smk"
 include: "rules/ModellingNormalTissue.smk"

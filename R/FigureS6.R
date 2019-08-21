@@ -27,6 +27,7 @@ parser$add_argument('--mutationcutoff', type='double',
 parser$add_argument('--rsqcutoff', type='double',
                     help="Only plot genes with an rsq fit greater than this")
 args <- parser$parse_args()
+print(args)
 
 message("Generating Figure 3...")
 message("\t Reading in data...")
@@ -128,11 +129,23 @@ g5 <- dfmiss.gene %>%
     ggtitle("PD18003 - NOTCH1") +
     geom_text(data = textdf, aes(label = label, y = y), x = 1.0, size = 5, parse = TRUE)
 
+message("Combine data frames...")
+
+dfcombined <- bind_rows(mutate(dfmiss.gene, mutationtype = "Missense"),
+                        mutate(dfnon.gene, mutationtype = "Nonsense"))
+print(distinct(dfcombined, patient, gene, nmutations))
+
 DFresults <- dfcombined %>%
     group_by(gene, mutationtype, deltafit, nmutations, deltafitlq, deltafituq) %>%
-    summarise(rsq = first(rsq)) %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationscutoff) %>%
+    summarise(rsq = first(rsq))
+
+print(DFresults)
+
+DFresults <- DFresults %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n())
+
+message("Plot DFE...")
 
 DFEmiss <- DFresults %>%
     filter(mutationtype == "Missense") %>%
@@ -156,13 +169,14 @@ message("Plot all fits...")
 
 
 textdf <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 7, mutationtype == "Missense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
+print(textdf)
 gmiss <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 7, mutationtype == "Missense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "plum4") +
@@ -175,13 +189,14 @@ gmiss <- dfcombined %>%
 #save_plot("FinalFigures/Figure3SX.pdf", g3, base_height = 12, base_width = 12)
 
 textdf <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 4, mutationtype == "Nonsense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
+print(textdf)
 gnon <- dfcombined %>%
-    filter(rsq > 0.6, nmutations > 4, mutationtype == "Nonsense") %>%
+    filter(rsq > args$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "darkseagreen4") +

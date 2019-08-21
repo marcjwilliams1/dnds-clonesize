@@ -39,7 +39,7 @@ dfnon <- read_csv(args$oesophagusfitnonsense, col_types = cols())
 dfmiss <- read_csv(args$oesophagusfitmissense, col_types = cols())
 
 dfnon.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
-dfmiss.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
+dfmiss.gene <- read_csv(args$oesophagusfitmissensepergene, col_types = cols())
 
 dfneutral <- read_csv(args$oesophagusfitneutral, col_types = cols())
 
