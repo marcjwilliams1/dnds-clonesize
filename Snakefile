@@ -24,7 +24,9 @@ rule all:
         expand("Figures/Figure{FIG}.pdf", FIG = figs),
         expand("Figures/FigureS{FIG}.pdf", FIG = suppfigs),
         expand(directory("results/oesophagus/SSBfiles/{oes_sample}/"), oes_sample=OES_SAMPLES),
-        expand(directory("results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.csv"), oes_sample2=SSB_OES_SAMPLES)
+        expand(directory("results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx"), oes_sample2=SSB_OES_SAMPLES),
+        "results/oesophagus/SSBresults/SSBdnds_results.csv",
+        "results/dataforfigures/oesophagusfit-SSB.csv"
 
 include: "rules/downloadTCGA.smk"
 include: "rules/ModellingNormalTissue.smk"

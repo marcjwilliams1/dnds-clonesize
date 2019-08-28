@@ -4,7 +4,7 @@ library(readxl)
 
 parser <- ArgumentParser(description = "Format SSB file to tidy format")
 parser$add_argument('--inputfile', type='character',
-                    help="Input file")
+                    help="Input file", nargs = "+")
 parser$add_argument('--outputfile', type='character',
                     help="Output file")
 parser$add_argument('--step', type = 'double',
@@ -15,28 +15,36 @@ parser$add_argument('--maxarea', type = 'double',
                     help="Min area for interval dN/dS")
 args <- parser$parse_args()
 
-dfall <- read_xlsx(args$inputfile, sheet = 1) %>%
-    mutate(gene = "All")
-dftp53 <- read_xlsx(args$inputfile, sheet = 2) %>%
-    mutate(gene = "TP53")
-dfnotch <- read_xlsx(args$inputfile, sheet = 3) %>%
-    mutate(gene = "NOTCH1")
+message("Creating empty dataframe")
+dfcombined <- data.frame()
 
-df <- bind_rows(dfall, dftp53) %>%
-    bind_rows(., dfnotch)
+for (i in 1:length(args$inputfile)) {
+    message(paste0("Reading in file number ", i, "/", length(args$inputfile)))
 
-df <- df %>%
-    separate(ID, c("ID", "idx"), "_") %>%
-    mutate(idx = as.numeric(idx)) %>%
-    arrange(gene, idx)
+    dfall <- read_xlsx(args$inputfile[i], sheet = 1) %>%
+        mutate(gene = "All")
+    dftp53 <- read_xlsx(args$inputfile[i], sheet = 2) %>%
+        mutate(gene = "TP53")
+    dfnotch <- read_xlsx(args$inputfile[i], sheet = 3) %>%
+        mutate(gene = "NOTCH1")
 
-message("Create vector of intervals for i-dN/dS")
-minarea <- args$minarea
-maxarea <- args$maxarea
-step <- args$step
-areacutoff <- seq(minarea, maxarea, step)
-dfintervals <- data.frame(cutoff = areacutoff) %>%
-    mutate(idx = 1:n())
+    df <- bind_rows(dfall, dftp53) %>%
+        bind_rows(., dfnotch)
 
-df <- left_join(df, dfintervals)
+    df <- df %>%
+        separate(ID, c("ID", "idx"), "_") %>%
+        mutate(idx = as.numeric(idx)) %>%
+        arrange(gene, idx)
+
+    message("Create vector of intervals for i-dN/dS")
+    minarea <- args$minarea
+    maxarea <- args$maxarea
+    step <- args$step
+    areacutoff <- seq(minarea, maxarea, step)
+    dfintervals <- data.frame(cutoff = areacutoff) %>%
+        mutate(idx = 1:n())
+
+    df <- left_join(df, dfintervals)
+    dfcombined <- bind_rows(dfcombined, df)
+}
 write_csv(df, args$outputfile)

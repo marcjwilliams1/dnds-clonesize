@@ -43,8 +43,8 @@ rule fitdNdSnormal:
         """
 
 rule formatresultsSSB:
-    input: "results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx"
-    output: "results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.csv"
+    input: expand("results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx", oes_sample2=SSB_OES_SAMPLES)
+    output: "results/oesophagus/SSBresults/SSBdnds_results.csv"
     params:
         singlepatient=config["patient"],
         step=config["idndslimits"]["step"],
@@ -58,4 +58,22 @@ rule formatresultsSSB:
             --step {params.step} \
             --minarea {params.minarea} \
             --maxarea {params.maxarea}
+        """
+
+rule fitdNdSnormalSSB:
+    input:
+        oesophagusdnds="results/oesophagus/SSBresults/SSBdnds_results.csv",
+        oesophagusmetadata="data/oesophagus/donorinfo.csv",
+    output:
+        oesophagusfit = "results/dataforfigures/oesophagusfit-SSB.csv",
+    shell:
+        """
+        module unload R
+        module load R/3.5.3
+        module load julia
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
+        julia julia/FitdNdS.jl \
+            --oesophagusdndsdata {input.oesophagusdnds} \
+            --oesophagusmetadata {input.oesophagusmetadata} \
+            --oesophagusfit {output.oesophagusfit} \
         """
