@@ -1,6 +1,6 @@
 __default__:
-    time: "10:00:00"
-    mem: 8G
+    time: "1:00:00"
+    mem: 1G
     resources: "\"span[hosts=1]\""
     name: "{rule}_snakemake"
     output: "{config[log_dir]}/{rule}.out"

@@ -41,3 +41,21 @@ rule fitdNdSnormal:
             --skinfitnonsensepergene {output.skinfitnonsensepergene} \
             --oesophagusfitneutral {output.oesophagusfitneutral}
         """
+
+rule formatresultsSSB:
+    input: "results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx"
+    output: "results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.csv"
+    params:
+        singlepatient=config["patient"],
+        step=config["idndslimits"]["step"],
+        minarea=config["idndslimits"]["minarea"],
+        maxarea=config["idndslimits"]["maxarea"]
+    shell:
+        """
+        Rscript R/formatSSB.R \
+            --inputfile {input} \
+            --outputfile {output} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+        """
