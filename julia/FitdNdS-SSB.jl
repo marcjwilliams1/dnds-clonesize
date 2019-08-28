@@ -29,10 +29,10 @@ println(parsed_args["oesophagusmetadata"])
 
 DFdonor = rcopy(readr.read_csv(parsed_args["oesophagusmetadata"]))
 DFcohort = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata"]))
-DFcohort[:A] = 2 * DFcohort[:areacutoff];
+DFcohort[:A] = 2 * DFcohort[:cutoff];
 
 println("Reading in per gene data...")
-DF = rcopy(readr.read_csv(parsed_args["oesophagusdndsdatagenes"]))
+DF = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata"]))
 DF[:A] = 2 .* DF[:cutoff];
 println("Data read in")
 
@@ -61,7 +61,7 @@ for gene in unique(DF[:gene])
     DFgene = filter(row -> row[:gene] == gene, DF);
     println("Analysing missense mutations")
     for p in unique(DF[:ID])
-        DFpatient = filter(row -> row[:patient] == p, DFgene);
+        DFpatient = filter(row -> row[:ID] == p, DFgene);
         age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
 
         nmuts = DFpatient[:muts][end]
@@ -93,5 +93,5 @@ println("Number of fits: $(length(unique(myDFmiss[:gene])))")
 @rput myDFnon
 R"""
 library(readr)
-write_csv(myDFmiss, $(parsed_args["oesophagusfits"]))
+write_csv(myDFmiss, $(parsed_args["oesophagusfit"]))
 """;

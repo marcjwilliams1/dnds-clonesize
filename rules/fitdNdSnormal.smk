@@ -72,7 +72,7 @@ rule fitdNdSnormalSSB:
         module load R/3.5.3
         module load julia
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
-        julia julia/FitdNdS.jl \
+        julia julia/FitdNdS-SSB.jl \
             --oesophagusdndsdata {input.oesophagusdnds} \
             --oesophagusmetadata {input.oesophagusmetadata} \
             --oesophagusfit {output.oesophagusfit} \
