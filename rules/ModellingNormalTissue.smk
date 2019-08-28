@@ -14,3 +14,13 @@ rule ModellingNormalTissue:
         --powerout {output.stemcellpower} \
         --nsamples {params.nsamples}
         """
+
+rule ModellingNormalTissueCloneSize:
+    output:
+        resultsfile="results/simulations/clonesize_overtime.csv"
+    shell:
+        """
+        module load julia
+        julia julia/ModellingNormalTissue-clonesize.jl \
+        --resultsfile {output.resultsfile}
+        """
