@@ -135,9 +135,9 @@ println("Generating some example data with fits using different bin sizes")
 
 #create empty dataframe to store data
 myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64,
-    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64],
+    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64],
 [:dnds, :A, :dndsfit, :dndsfitlq, :dndsfituq, :deltafit, :lambdarfit,
-    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue], 0)
+    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue, :stepsize], 0)
 
 for Δ in [0.4, 0.5]
     println(Δ)
