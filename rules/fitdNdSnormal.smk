@@ -8,6 +8,7 @@ rule fitdNdSnormal:
         skindndsgenes="results/skin/dnds_genes.csv",
         skinmetadata="data/skin/donorinfo.csv",
     output:
+        oesophagusfitall = "results/dataforfigures/oesophagusfitall.csv",
         oesophagusfitmissense = "results/dataforfigures/oesophagusfitmissense.csv",
         oesophagusfitnonsense = "results/dataforfigures/oesophagusfitnonsense.csv",
         skinfitmissense = "results/dataforfigures/skinfitmissense.csv",
@@ -32,6 +33,7 @@ rule fitdNdSnormal:
             --skindndsdatagenes {input.skindndsgenes} \
             --skinmetadata {input.skinmetadata} \
             --oesophagusfitmissense {output.oesophagusfitmissense} \
+            --oesophagusfitall {output.oesophagusfitall} \
             --oesophagusfitnonsense {output.oesophagusfitnonsense} \
             --skinfitmissense {output.skinfitmissense} \
             --skinfitnonsense {output.skinfitnonsense} \
