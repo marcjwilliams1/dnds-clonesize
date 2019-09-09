@@ -45,8 +45,14 @@ rule fitdNdSnormal:
         """
 
 rule formatresultsSSB:
-    input: expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),
-    output: "results/oesophagus/SSBresults/SSBdnds_results.csv"
+    input:
+        all = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),
+        missense = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}_mis.txt", ssb_genes=SSB_genes),
+        nonsense = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}_non.txt", ssb_genes=SSB_genes),
+    output:
+        all = "results/oesophagus/SSBresults/SSBdnds_results.csv",
+        missense = "results/oesophagus/SSBresults/SSBdnds_results_missense.csv",
+        nonsense = "results/oesophagus/SSBresults/SSBdnds_results_nonsense.csv"
     params:
         singlepatient=config["patient"],
         step=config["idndslimits"]["step"],
@@ -56,17 +62,34 @@ rule formatresultsSSB:
         """
         module load R
         Rscript R/formatSSB.R \
-            --inputfile {input} \
-            --outputfile {output} \
+            --inputfile {input.all} \
+            --outputfile {output.all} \
             --step {params.step} \
             --minarea {params.minarea} \
             --maxarea {params.maxarea}
+
+        Rscript R/formatSSB.R \
+            --inputfile {input.missense} \
+            --outputfile {output.missense} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+
+        Rscript R/formatSSB.R \
+            --inputfile {input.nonsense} \
+            --outputfile {output.nonsense} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+
         """
 
 rule fitdNdSnormalSSB:
     input:
-        oesophagusdnds="results/oesophagus/SSBresults/SSBdnds_results.csv",
-        oesophagusmetadata="data/oesophagus/donorinfo.csv",
+        all = "results/oesophagus/SSBresults/SSBdnds_results.csv",
+        missense = "results/oesophagus/SSBresults/SSBdnds_results_missense.csv",
+        nonsense = "results/oesophagus/SSBresults/SSBdnds_results_nonsense.csv",
+        oesophagusmetadata = "data/oesophagus/donorinfo.csv",
     output:
         oesophagusfit = "results/dataforfigures/oesophagusfit-SSB.csv",
     shell:
@@ -76,7 +99,9 @@ rule fitdNdSnormalSSB:
         module load julia
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
         julia julia/FitdNdS-SSB.jl \
-            --oesophagusdndsdata {input.oesophagusdnds} \
+            --oesophagusdndsdata {input.all} \
+            --oesophagusdndsdata_miss {input.missense} \
+            --oesophagusdndsdata_non {input.nonsense} \
             --oesophagusmetadata {input.oesophagusmetadata} \
             --oesophagusfit {output.oesophagusfit} \
         """

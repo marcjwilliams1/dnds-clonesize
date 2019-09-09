@@ -40,5 +40,8 @@ areacutoff <- seq(minarea, maxarea, step)
 dfintervals <- data.frame(cutoff = areacutoff) %>%
     mutate(idx = 1:n())
 
+df <- df %>%
+    mutate(muts = ifelse(is.na(muts), na + ns, muts))
+
 df <- left_join(df, dfintervals)
 write_csv(df, args$outputfile)
