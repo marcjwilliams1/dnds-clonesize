@@ -172,3 +172,16 @@ rule Figurecomparednds:
             --dndscvmissensepergene {input.dndscvfitmissensepergene} \
             --dndscvnonsensepergene {input.dndscvfitnonsensepergene} \
         """
+
+rule Figurebinsize:
+    input:
+        binsizesims = "results/dataforfigures/stemcell_simulation_differentbins.csv"
+    output:
+        figure = "Figures/Figurebinsize"
+    shell:
+        """
+        module load R
+        Rscript R/Figure-binsize.R \
+            --figure {output.figure} \
+            --binsizesims {input.binsizesims}
+        """
