@@ -143,7 +143,7 @@ for Δ in [0.4, 0.5]
     println(Δ)
     for rlam in [0.25]
         for mygap in [0.02, 0.03, 0.04, 0.05, 0.1, 0.2]
-            Random.seed!(12345)
+            Random.seed!(123)
             println(rlam)
             rlambda = rlam
             DF1, SM = simulatepopulation(;Δ = Δ, tend = 30.0, Amin = 0.05, ρ = 100.0, λ = rlambda, Amax = 25.0, gap = mygap)

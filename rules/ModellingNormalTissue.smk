@@ -2,7 +2,6 @@ rule ModellingNormalTissue:
     output:
         stemcellexamplefit="results/dataforfigures/stemcell_simulation_examplefits.csv",
         stemcellexampledifferentbins="results/dataforfigures/stemcell_simulation_differentbins.csv",
-        stemcellpower="results/dataforfigures/stemcell_simulation_power.csv"
     params:
         nsamples = config["nsamplesnormal"]
     shell:
