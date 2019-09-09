@@ -17,14 +17,13 @@ suppfigs=[1,2,3,4,5,6,7,8,9,10,11]
 
 #list of oesophagus samples
 OES_SAMPLES=["PD36806","PD36712","PD30272","PD30986","PD30987","PD30274", "PD30988", "PD30273","PD31182"]
-SSB_OES_SAMPLES=["PD31182"]
+SSB_genes=["global", "notch1", "tp53"]
 
 rule all:
     input:
         expand("Figures/Figure{FIG}.pdf", FIG = figs),
         expand("Figures/FigureS{FIG}.pdf", FIG = suppfigs),
         expand(directory("results/oesophagus/SSBfiles/{oes_sample}/"), oes_sample=OES_SAMPLES),
-        expand(directory("results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx"), oes_sample2=SSB_OES_SAMPLES),
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
         "results/dataforfigures/oesophagusfit-SSB.csv"
 
