@@ -1,6 +1,7 @@
 rule ModellingNormalTissue:
     output:
         stemcellexamplefit="results/dataforfigures/stemcell_simulation_examplefits.csv",
+        stemcellexampledifferentbins="results/dataforfigures/stemcell_simulation_differentbins.csv",
         stemcellpower="results/dataforfigures/stemcell_simulation_power.csv"
     params:
         nsamples = config["nsamplesnormal"]
@@ -10,9 +11,10 @@ rule ModellingNormalTissue:
         module load julia
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
         julia julia/ModellingNormalTissue.jl \
-        --examplefitsout {output.stemcellexamplefit} \
-        --powerout {output.stemcellpower} \
-        --nsamples {params.nsamples}
+            --examplefitsout {output.stemcellexamplefit} \
+            --exampledifferentbins {output.stemcellexampledifferentbins} \
+            --powerout {output.stemcellpower} \
+            --nsamples {params.nsamples}
         """
 
 rule ModellingNormalTissueCloneSize:
@@ -22,5 +24,5 @@ rule ModellingNormalTissueCloneSize:
         """
         module load julia
         julia julia/ModellingNormalTissue-clonesize.jl \
-        --resultsfile {output.resultsfile}
+            --resultsfile {output.resultsfile}
         """

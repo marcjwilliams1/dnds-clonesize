@@ -24,6 +24,8 @@ s = ArgParseSettings()
 @add_arg_table s begin
     "--examplefitsout"
         help = "File to save example fits"
+    "--exampledifferentbins"
+        help = "File to save example fits"
     "--powerout"
         help = "File to save power analysis"
     "--nsamples"
@@ -67,7 +69,7 @@ function simulatepopulation(;Δ = 0.0, ρ = 100.0, Amin = 1 ./ ρ, gap = 0.02, t
     Msel = Int64[]
     Mneut = Int64[]
     SMtog = SkinStemCellModel(Ncells, Δmut = Δ, μp = 0.001, μd = 0.001, tend = tend, r = r, λ = λ)
-    @showprogress for i in 1:Nits
+    for i in 1:Nits
         scst = runsimulation(SMtog, progress = false, finish = "time", onedriver = true, restart = true)
         append!(Msel, filter!(x -> x > 0, counts(sort(StemCellModels.cellsconvert(scst.stemcells)[2]), rangeN)))
         append!(Mneut, filter!(x -> x > 0, counts(sort(StemCellModels.cellsconvert(scst.stemcells)[1]), rangeN)))
@@ -88,7 +90,6 @@ function simulatepopulation(;Δ = 0.0, ρ = 100.0, Amin = 1 ./ ρ, gap = 0.02, t
     if Amax == 0.0
         Amax = maximum(Asel)
     end
-    gap = 0.02
 
     x1 = intervaldnds_data(Asel, Aneut, Amin, Amax; mgap = gap, mup = SMtog.μp, mud = SMtog.μd)
 
@@ -97,6 +98,8 @@ function simulatepopulation(;Δ = 0.0, ρ = 100.0, Amin = 1 ./ ρ, gap = 0.02, t
 
     return DFinterval, SMtog, [DFinterval[:dn][end] * Nits, DFinterval[:ds][end] * Nits]
 end
+
+println("Generating some example data with fits")
 
 #create empty dataframe to store data
 myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64,
@@ -117,42 +120,53 @@ for Δ in [0.0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]
     end
 end
 
+println("Writing data to file")
 @rput myDF
 R"""
 write_csv(myDF, $(parsed_args["examplefitsout"]))
 """;
 
+
+#####################################################
+# Different bin sizes
+#####################################################
+
+println("Generating some example data with fits using different bin sizes")
+
+#create empty dataframe to store data
+myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64,
+    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64],
+[:dnds, :A, :dndsfit, :dndsfitlq, :dndsfituq, :deltafit, :lambdarfit,
+    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue], 0)
+
+for Δ in [0.4, 0.5]
+    println(Δ)
+    for rlam in [0.25]
+        for mygap in [0.02, 0.03, 0.04, 0.05, 0.1, 0.2]
+            Random.seed!(12345)
+            println(rlam)
+            rlambda = rlam
+            DF1, SM = simulatepopulation(;Δ = Δ, tend = 30.0, Amin = 0.05, ρ = 100.0, λ = rlambda, Amax = 25.0, gap = mygap)
+            x = LLoptimizationresults(DF1[:dnds], DF1[:A]; t = 30.0, Amin = 0.05, ρ = 100.0)
+            x.DF[:deltatrue] = Δ
+            x.DF[:lambdartrue] = rlambda * SM.r
+            x.DF[:stepsize] = mygap
+            append!(myDF, x.DF)
+        end
+    end
+end
+
+println("Writing data to file")
+@rput myDF
 R"""
-textdf <-  myDF %>%
-    filter(deltatrue > 0.3, lambdartrue == 0.25) %>%
-    group_by(deltatrue) %>%
-    mutate(deltag = paste0(deltatrue)) %>%
-     mutate(label = paste("list(Delta[input] == ", deltatrue,", Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")")) %>%
-    distinct(deltatrue, deltag, label) %>%
-    mutate(y = ifelse(deltatrue == 0.4, 6.5, 8.6))
-
-gsim <- myDF %>%
-    filter(row_number() %% 5 == 0) %>%
-    filter(deltatrue > 0.3, lambdartrue == 0.25) %>%
-    filter(row_number() %% 5 == 0) %>%
-    #filter(A < 15.0) %>%
-    mutate(deltag = paste0(deltatrue)) %>%
-    ggplot(aes(x = A)) +
-    geom_point(aes(y = dnds,  group = deltag, fill = deltag, col = deltag), alpha = 0.9, size = 1) +
-    geom_line(aes(y = dndsfit, group = deltag, fill = deltag, col = deltag), alpha = 0.3, size = 1) +
-    geom_ribbon(aes(ymin = dndsfitlq, ymax = dndsfituq, group = deltag, fill = deltag, col = deltag), alpha = 0.1) +
-    geom_text(data = textdf, aes(label = label, y = y, col = deltag), x = 15.0, size = 3, parse = TRUE) +
-    xlab("Clone Area") +
-    ylab("dN/dS") +
-    ggtitle("Simulated cohort") +
-    theme(legend.position = "none") +
-    scale_color_jcolors(palette = "pal6")
-gsim
-"""
+write_csv(myDF, $(parsed_args["exampledifferentbins"]))
+""";
 
 #####################################################
-# Power to rescover paramters
+# Power to recover paramters
 #####################################################
+println("Running simulation to test power to recover paramters")
+
 
 #create some empty vectors and dataframes to store data
 deltavec = Float64[]
@@ -212,42 +226,8 @@ rsq = rsq)
 
 DFfit[:product] = DFfit[:delta] .* DFfit[:rlambda];
 
-#write data to file to for plotting later on
+println("Write data to file")
 @rput DFfit
 R"""
 write_csv(DFfit, $(parsed_args["powerout"]))
 """;
-
-@rput DFfit
-R"""
-library(Hmisc)
-library(ggforce)
-
-g1 <- DFfit %>%
-    mutate(nsamples = factor(paste0(nsamples),
-    levels = Cs(5, 8, 10, 25, 50, 100, 250))) %>%
-    ggplot(aes(x = nsamples, y = delta)) +
-    #geom_violin(fill = "steelblue4") +
-    geom_sina(col = "steelblue4") +
-    geom_boxplot(width = 0.3, alpha = 0.7, col = "steelblue4") +
-    ylim(c(0, 1.0)) +
-    geom_hline(yintercept = 0.25, lty = 2) +
-    xlab("Number of mutations") +
-    ylab(expression(Delta))
-
-g2 <- DFfit %>%
-    mutate(nsamples = factor(paste0(nsamples),
-    levels = Cs(5, 8, 10, 25, 50, 100, 250))) %>%
-    ggplot(aes(x = nsamples, y = rsq)) +
-    geom_sina(col = "steelblue4") +
-    geom_boxplot(width = 0.3, alpha = 0.7, col = "steelblue4") +
-    ylim(c(0, 1.0)) +
-    geom_hline(yintercept = 0.25, lty = 2) +
-    xlab("Number of mutations") +
-    ylab(expression(R^2)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-gout <- plot_grid(g1, g2, labels = c("a", "b"))
-#save_plot("plots/2.Stem-Cell-Theory/power-accurate-inference.pdf", gout, base_height = 5, base_width = 9)
-gout
-"""
