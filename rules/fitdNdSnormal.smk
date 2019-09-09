@@ -43,7 +43,7 @@ rule fitdNdSnormal:
         """
 
 rule formatresultsSSB:
-    input: expand("results/oesophagus/SSBresults/{oes_sample2}_SSBdnds_results.xlsx", oes_sample2=SSB_OES_SAMPLES)
+    input: expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),
     output: "results/oesophagus/SSBresults/SSBdnds_results.csv"
     params:
         singlepatient=config["patient"],
@@ -52,6 +52,7 @@ rule formatresultsSSB:
         maxarea=config["idndslimits"]["maxarea"]
     shell:
         """
+        module load R
         Rscript R/formatSSB.R \
             --inputfile {input} \
             --outputfile {output} \

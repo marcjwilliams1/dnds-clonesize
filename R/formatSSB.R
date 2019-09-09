@@ -16,35 +16,29 @@ parser$add_argument('--maxarea', type = 'double',
 args <- parser$parse_args()
 
 message("Creating empty dataframe")
-dfcombined <- data.frame()
 
-for (i in 1:length(args$inputfile)) {
-    message(paste0("Reading in file number ", i, "/", length(args$inputfile)))
+dfall <- read_delim(args$inputfile[1], delim = "\t", guess_max = 10^5) %>%
+    mutate(gene = "All")
+dftp53 <- read_delim(args$inputfile[2], delim = "\t", guess_max = 10^5) %>%
+    mutate(gene = "TP53")
+dfnotch <- read_delim(args$inputfile[3], delim = "\t", guess_max = 10^5) %>%
+    mutate(gene = "NOTCH1")
 
-    dfall <- read_xlsx(args$inputfile[i], sheet = 1) %>%
-        mutate(gene = "All")
-    dftp53 <- read_xlsx(args$inputfile[i], sheet = 2) %>%
-        mutate(gene = "TP53")
-    dfnotch <- read_xlsx(args$inputfile[i], sheet = 3) %>%
-        mutate(gene = "NOTCH1")
+df <- bind_rows(dfall, dftp53) %>%
+    bind_rows(., dfnotch)
 
-    df <- bind_rows(dfall, dftp53) %>%
-        bind_rows(., dfnotch)
+df <- df %>%
+    separate(ID, c("ID", "idx"), "_") %>%
+    mutate(idx = as.numeric(idx)) %>%
+    arrange(gene, idx)
 
-    df <- df %>%
-        separate(ID, c("ID", "idx"), "_") %>%
-        mutate(idx = as.numeric(idx)) %>%
-        arrange(gene, idx)
+message("Create vector of intervals for i-dN/dS")
+minarea <- args$minarea
+maxarea <- args$maxarea
+step <- args$step
+areacutoff <- seq(minarea, maxarea, step)
+dfintervals <- data.frame(cutoff = areacutoff) %>%
+    mutate(idx = 1:n())
 
-    message("Create vector of intervals for i-dN/dS")
-    minarea <- args$minarea
-    maxarea <- args$maxarea
-    step <- args$step
-    areacutoff <- seq(minarea, maxarea, step)
-    dfintervals <- data.frame(cutoff = areacutoff) %>%
-        mutate(idx = 1:n())
-
-    df <- left_join(df, dfintervals)
-    dfcombined <- bind_rows(dfcombined, df)
-}
+df <- left_join(df, dfintervals)
 write_csv(df, args$outputfile)
