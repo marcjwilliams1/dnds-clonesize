@@ -13,6 +13,20 @@ rule ModellingNormalTissue:
         julia julia/ModellingNormalTissue.jl \
             --examplefitsout {output.stemcellexamplefit} \
             --exampledifferentbins {output.stemcellexampledifferentbins} \
+            --nsamples {params.nsamples}
+        """
+
+rule ModellingNormalTissuePower:
+    output:
+        stemcellpower="results/dataforfigures/stemcell_simulation_power.csv"
+    params:
+        nsamples = config["nsamplesnormal"]
+    shell:
+        """
+        module load R/3.5.3
+        module load julia
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
+        julia julia/ModellingNormalTissuePower.jl \
             --powerout {output.stemcellpower} \
             --nsamples {params.nsamples}
         """
