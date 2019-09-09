@@ -11,7 +11,7 @@ library(argparse)
 
 parser <- ArgumentParser(description = "Generate Final Figures")
 parser$add_argument('--figure', type='character',
-                    help="Outpute figure files")
+                    help="Output figure files")
 args <- parser$parse_args()
 
 message("Generating Figure 1...")
