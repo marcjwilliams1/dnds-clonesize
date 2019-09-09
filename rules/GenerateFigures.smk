@@ -149,3 +149,26 @@ rule Figure5:
             --inferreds {input.syntheticcohort_inferreds} \
             --baselinevalidation {input.baselinevalidation}
         """
+
+rule Figurecomparednds:
+    input:
+        alldndscv = "results/dataforfigures/oesophagusfitall.csv",
+        dndscvfitmissense = "results/dataforfigures/oesophagusfitmissense.csv",
+        dndscvfitnonsense = "results/dataforfigures/oesophagusfitnonsense.csv",
+        dndscvfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene.csv",
+        dndscvfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
+        SSB = "results/dataforfigures/oesophagusfit-SSB.csv"
+    output:
+        figure = "Figures/Figure6.pdf"
+    shell:
+        """
+        module load R
+        Rscript R/Figure-comparednds.R \
+            --figure {output.figure} \
+            --SSB {input.SSB} \
+            --alldndscv {input.alldndscv} \
+            --dndscvmissense {input.dndscvfitmissense} \
+            --dndscvnonsense {input.dndscvfitnonsense} \
+            --dndscvmissensepergene {input.dndscvfitmissensepergene} \
+            --dndscvnonsensepergene {input.dndscvfitnonsensepergene} \
+        """
