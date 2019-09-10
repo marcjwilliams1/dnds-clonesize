@@ -27,10 +27,7 @@ rule all:
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
         "results/dataforfigures/oesophagusfit-SSB.csv"
 
-include: "rules/downloadTCGA.smk"
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"
 include: "rules/fitdNdSnormal.smk"
-include: "rules/CalculatedNdS-tcga.smk"
-include: "rules/ModellingCancer.smk"
 include: "rules/GenerateFigures.smk"
