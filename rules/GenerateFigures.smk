@@ -105,12 +105,12 @@ rule Figurecomparednds:
         dndscvfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
         SSB = "results/dataforfigures/oesophagusfit-SSB.csv"
     output:
-        figure = "Figures/FigureS13.pdf"
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [12,13])
     shell:
         """
         module load R
         Rscript R/Figure-comparednds.R \
-            --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
             --SSB {input.SSB} \
             --alldndscv {input.alldndscv} \
             --dndscvmissense {input.dndscvfitmissense} \
@@ -123,11 +123,11 @@ rule Figurebinsize:
     input:
         binsizesims = "results/dataforfigures/stemcell_simulation_differentbins.csv"
     output:
-        figure = "Figures/FigureS12.pdf"
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [14])
     shell:
         """
         module load R
         Rscript R/Figure-binsize.R \
-            --figure {output.figure} \
+            --suppfigures {output.suppfigures} \
             --binsizesims {input.binsizesims}
         """
