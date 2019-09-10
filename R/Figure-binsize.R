@@ -11,22 +11,27 @@ library(argparse)
 
 parser <- ArgumentParser(description = "Generate Final Figures")
 parser$add_argument('--figure', type='character',
-                    help="Output figure files")
+                    help="Output figure files", default = NULL)
+parser$add_argument('--suppfigures', type='character',
+                    help="Outpute figure files", nargs = "+", default = NULL)
 parser$add_argument('--binsizesims', type='character',
                     help="Bin size simulations")
 args <- parser$parse_args()
+dfsim <- read_csv(args$binsizesims) %>%
+  filter(stepsize < 0.1)
 
-df <- read_csv(args$binsizesims) %>% filter(stepsize < 0.1)
+del <- 0.4
 
-del <- 0.1
-
-dfsim %>%
-  #filter(deltatrue == del) %>%
+gsummary <- dfsim %>%
+  filter(deltatrue == del) %>%
   distinct(stepsize, deltafit, deltafitlq, deltafituq, deltatrue) %>%
   ggplot(aes(x = factor(stepsize), y = deltafit, ymin = deltafitlq, ymax = deltafituq)) +
   geom_point() +
   geom_linerange() +
-  facet_wrap(~deltatrue, scales = "free")
+  ylim(c(0.4, 0.41)) +
+  xlab("Bin size") +
+  ylab(expression("Inferred " *Delta)) +
+  ggtitle(expression("Input "*Delta*" = 0.4"))
 
 
 textdf <- dfsim %>%
@@ -35,7 +40,7 @@ textdf <- dfsim %>%
   mutate(deltag = paste0(deltatrue)) %>%
   mutate(label = paste("list(Delta[input] == ", deltatrue,", Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")")) %>%
   distinct(deltatrue, deltag, label) %>%
-  mutate(y = ifelse(deltatrue == 0.4, 2.5, 2.6))
+  mutate(y = 6.0)
 
 gsim <- dfsim %>%
   filter(row_number() %% 5 == 0) %>%
@@ -47,11 +52,14 @@ gsim <- dfsim %>%
   geom_point(aes(y = dnds,  group = deltag, fill = deltag, col = deltag), alpha = 0.9, size = 1) +
   geom_line(aes(y = dndsfit, group = deltag, fill = deltag, col = deltag), alpha = 0.3, size = 1) +
   geom_ribbon(aes(ymin = dndsfitlq, ymax = dndsfituq, group = deltag, fill = deltag, col = deltag), alpha = 0.1) +
-  geom_text(data = textdf, aes(label = label, y = y, col = deltag), x = 15.0, size = 3, parse = TRUE) +
+  geom_text(data = textdf, aes(label = label, y = y, col = deltag), x = 2.5, size = 3, parse = TRUE) +
   xlab("Clone Area") +
   ylab("dN/dS") +
-  ggtitle("Simulated cohort") +
   theme(legend.position = "none") +
   scale_color_jcolors(palette = "pal6") +
   facet_wrap(~stepsize) +
   xlim(c(0, 5))
+
+
+gout <- plot_grid(gsim, gsummary, labels = c("a", "b"))
+save_plot(args$suppfigures[1], gout, base_height = 5, base_width = 13)

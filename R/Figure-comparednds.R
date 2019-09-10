@@ -116,7 +116,7 @@ gmiss <- SSB %>%
   ggtitle("PD30273, TP53, Missense")
 
 gout <- plot_grid(plot_grid(gmiss, g2,labels = c("a", "b")), g1, ncol = 1, labels = c("", "c"))
-save_plot(args$suppfigure[1], gout, base_height = 8, base_width = 13)
+save_plot(args$suppfigures[1], gout, base_height = 8, base_width = 13)
 
 
 forlm <- summarydf
@@ -177,4 +177,4 @@ gnon <- SSB %>%
 
 g <- plot_grid(gmiss, gnon, ncol = 2, labels = c("a", "b"))
 
-save_plot(args$suppfigure[2], g, base_height = 8, base_width = 16)
+save_plot(args$suppfigures[2], g, base_height = 8, base_width = 16)
