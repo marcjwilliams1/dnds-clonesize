@@ -96,60 +96,6 @@ rule FigureS6:
             --rsqcutoff {params.rsqcutoff}
         """
 
-rule Figure4:
-    input:
-        vafclonality="results/TCHA/VAFclonality.csv",
-        dndsclonality_percancertype="results/TCGA/dndsclonality_percancertype.csv",
-        dndsclonality="results/TCGA/dndsclonality.csv",
-        baseline="results/TCGA/baseline.csv",
-    output:
-        figure="Figures/Figure4.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [7])
-    shell:
-        """
-        module load R
-        Rscript R/Figure4.R \
-            --figure {output.figure} \
-            --suppfigures {output.suppfigures} \
-            --tcgadata {input.vafclonality} \
-            --baseline {input.baseline} \
-            --dndsclonality_percancertype {input.dndsclonality_percancertype} \
-            --dndsclonality {input.dndsclonality}
-        """
-
-rule Figure5:
-    input:
-        intervaldnds="results/TCGA/intervaldnds.csv",
-        nmutations_gene="results/TCGA/nmutations_gene.csv",
-        nmutations_gene_percancertype="results/TCGA/nmutations_gene_percancertype.csv",
-        syntheticcohort_power="results/dataforfigures/syntheticcohort_power.csv",
-        syntheticcohort="results/dataforfigures/syntheticcohort.csv",
-        syntheticcohort_diffmu="results/dataforfigures/syntheticcohort_diffmu.csv",
-        drivergenelist="data/genelists/Driver_gene_list_198_Science_Review.txt",
-        syntheticcohort_fmin="results/dataforfigures/syntheticcohort_fmin.csv",
-        syntheticcohort_inferreds="results/dataforfigures/syntheticcohort_inferreds.csv",
-        baselinevalidation="results/TCGA/baseline_validate.csv",
-    output:
-        figure="Figures/Figure5.pdf",
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [8,9,11])
-    shell:
-        """
-        module load R
-        Rscript R/Figure5.R \
-            --figure {output.figure} \
-            --suppfigures {output.suppfigures} \
-            --nmutations_gene {input.nmutations_gene} \
-            --nmutations_gene_percancertype {input.nmutations_gene_percancertype} \
-            --intervaldNdSsim {input.syntheticcohort} \
-            --intervaldNdSsimmu {input.syntheticcohort_diffmu} \
-            --intervaldNdSsimpower {input.syntheticcohort_power} \
-            --intervaldNdStcga {input.intervaldnds} \
-            --drivergenelist {input.drivergenelist} \
-            --fmin {input.syntheticcohort_fmin} \
-            --inferreds {input.syntheticcohort_inferreds} \
-            --baselinevalidation {input.baselinevalidation}
-        """
-
 rule Figurecomparednds:
     input:
         alldndscv = "results/dataforfigures/oesophagusfitall.csv",
@@ -159,7 +105,7 @@ rule Figurecomparednds:
         dndscvfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
         SSB = "results/dataforfigures/oesophagusfit-SSB.csv"
     output:
-        figure = "Figures/Figure6.pdf"
+        figure = "Figures/FigureS13.pdf"
     shell:
         """
         module load R
@@ -177,7 +123,7 @@ rule Figurebinsize:
     input:
         binsizesims = "results/dataforfigures/stemcell_simulation_differentbins.csv"
     output:
-        figure = "Figures/Figurebinsize"
+        figure = "Figures/FigureS12.pdf"
     shell:
         """
         module load R
