@@ -25,9 +25,11 @@ rule all:
         expand("Figures/FigureS{FIG}.pdf", FIG = suppfigs),
         expand(directory("results/oesophagus/SSBfiles/{oes_sample}/"), oes_sample=OES_SAMPLES),
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
-        "results/dataforfigures/oesophagusfit-SSB.csv"
+        "results/dataforfigures/oesophagusfit-SSB.csv",
+        "results/dataforfigures/brmsfit.Rdata"
 
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"
 include: "rules/fitdNdSnormal.smk"
 include: "rules/GenerateFigures.smk"
+include: "rules/clonesizefit.smk"
