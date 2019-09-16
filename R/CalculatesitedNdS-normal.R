@@ -25,7 +25,7 @@ parser$add_argument('--maxarea', type = 'double',
                     help="Min area for interval dN/dS")
 args <- parser$parse_args()
 
-args$step <- 5 * args$step
+args$step <- 1 * args$step
 
 message("Read in meta data for the oesophagus")
 dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
@@ -68,9 +68,16 @@ for (p in unique(df$donor)){
     out2 <- combined %>%
       mutate(areacutoff = cutoff, patient = p)
     dfdnds.genes.patient <- rbind(dfdnds.genes.patient, out2)
-    hotspots <- sitednds(x) %>%
-      mutate(areacutoff = cutoff, patient = p)
-    df.hotspots <- bind_rows(df.hotspots, hotspots)
+    hotspots_res <- sitednds(x)
+    if (is.null(hotspots_res$recursites)){
+        message("No recurrent mutations...")
+        next
+    } else {
+        message(paste0("Number of reccurent mutations: ", length(hotspots_res$recursites$chr)))
+        hotspots <- hotspots_res$recursites %>%
+          mutate(areacutoff = cutoff, patient = p)
+        df.hotspots <- bind_rows(df.hotspots, hotspots)
+    }
   }
   message("\n")
   i <- i + 1

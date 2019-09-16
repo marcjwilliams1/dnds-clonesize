@@ -1,6 +1,6 @@
 __default__:
-    time: "1:00:00"
-    mem: 1G
+    time: "5:00:00"
+    mem: 4G
     resources: "\"span[hosts=1]\""
     name: "{rule}_snakemake"
     output: "{config[log_dir]}/{rule}.out"
@@ -97,7 +97,7 @@ brms:
     error: "{config[log_dir]}/{rule}.out"
 
 brmssites:
-    time: "10:00:00"
+    time: "2:00:00"
     mem: 2G
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
