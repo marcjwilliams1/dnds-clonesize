@@ -59,7 +59,8 @@ for (p in unique(df$donor)){
       filter(sumvaf < cutoff) #filter for mutations with sumvaf < cutoff
     x <- dndscv(x1, gene_list = target_genes,
                 outp = 3, max_muts_per_gene_per_sample = Inf,
-                max_coding_muts_per_sample = Inf)
+                max_coding_muts_per_sample = Inf,
+                outmats = T)
     out <- x$globaldnds %>%
         mutate(areacutoff = cutoff, nmutations = length(x1$donor), patient = p)
     dfdnds.patient <- rbind(dfdnds.patient, out)
