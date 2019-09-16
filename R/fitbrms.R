@@ -108,34 +108,16 @@ brms_extval <- add_criterion(brms_extval,
 print(brms_extval)
 print(bayes_R2(brms_extval))
 
-###########################################################
-# Gamma distribution
-###########################################################
-message("")
-message("###########################################################")
-message("Brms fit with gamma distribution")
-brms_gamma <- brm(formula,
-                dat = dat,
-                family = Gamma(),
-                chains = nchains,
-                cores = nchains,
-		        control = list(adapt_delta = 0.9),
-                iter = its)
-brms_gamma <- add_criterion(brms_gamma,
-                            c("loo", "waic", "R2"))
-print(brms_gamma)
-print(bayes_R2(brms_gamma))
-
 message("")
 message("###########################################################")
 message("Compare models")
 
 loo_compare_loo <- loo_compare(brms_normal, brms_frechet,
-                                brms_lognormal, brms_gamma,
+                                brms_lognormal,
                                 brms_extval,
                             criterion = "loo")
 loo_compare_waic <- loo_compare(brms_normal, brms_frechet,
-                                brms_lognormal, brms_gamma,
+                                brms_lognormal,
                                 brms_extval,
                             criterion = "waic")
 print(loo_compare_loo)
@@ -148,7 +130,6 @@ message("Saving file")
 out <- list(normal = brms_normal,
             frechet = brms_frechet,
             lognormal = brms_lognormal,
-            gamma = brms_gamma,
             extval = brms_extval,
             model_comparison_loo = loo_compare_loo,
             model_comparison_waic = loo_compare_waic)
