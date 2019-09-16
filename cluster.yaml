@@ -93,6 +93,5 @@ MakeFilesSSB:
 brms:
     time: "10:00:00"
     mem: 8G
-    resources: "\"span[hosts=1]\""
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"

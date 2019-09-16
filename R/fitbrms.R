@@ -33,7 +33,7 @@ dat <- df %>%
 
 message("Define brms paramters")
 nchains <- 4
-its <- 50
+its <- 5000
 formula <- bf(area ~ (1 + Age2|gene1))
 
 ###########################################################
@@ -47,22 +47,12 @@ brms_lognormal <- brm(formula,
                 family = lognormal(),
                 chains = nchains,
                 cores = nchains,
+		        control = list(adapt_delta = 0.9),
                 iter = its)
+brms_lognormal <- add_criterion(brms_lognormal,
+                            c("loo", "waic", "R2"))
 print(brms_lognormal)
-
-###########################################################
-# Frechet distribution
-###########################################################
-message("")
-message("###########################################################")
-message("Brms fit with frechet distribution")
-brms_frechet <- brm(formula,
-                dat = dat,
-                family = frechet(),
-                chains = nchains,
-                cores = nchains,
-                iter = its)
-print(brms_frechet)
+print(bayes_R2(brms_lognormal))
 
 ###########################################################
 # Normal distribution
@@ -75,14 +65,92 @@ brms_normal <- brm(formula,
                 family = gaussian(),
                 chains = nchains,
                 cores = nchains,
+		        control = list(adapt_delta = 0.9),
                 iter = its)
+brms_normal <- add_criterion(brms_normal,
+                            c("loo", "waic", "R2"))
 print(brms_normal)
+print(bayes_R2(brms_normal))
 
-out <- list(normal = brms_normal,
-            frecher = brms_frechet,
-            lognormal = brms_lognormal)
+###########################################################
+# Frechet distribution
+###########################################################
+message("")
+message("###########################################################")
+message("Brms fit with frechet distribution")
+brms_frechet <- brm(formula,
+                dat = dat,
+                family = frechet(),
+                chains = nchains,
+                cores = nchains,
+		        control = list(adapt_delta = 0.8),
+                iter = its)
+brms_frechet <- add_criterion(brms_frechet,
+                            c("loo", "waic", "R2"))
+print(brms_frechet)
+print(bayes_R2(brms_frechet))
+
+###########################################################
+# Generalized extreme value distribution
+###########################################################
+message("")
+message("###########################################################")
+message("Brms fit with generalized extreme value distribution")
+brms_extval <- brm(formula,
+                dat = dat,
+                family = gen_extreme_value(),
+                chains = nchains,
+                cores = nchains,
+		        control = list(adapt_delta = 0.8),
+                iter = its)
+brms_extval <- add_criterion(brms_extval,
+                            c("loo", "waic", "R2"))
+print(brms_extval)
+print(bayes_R2(brms_extval))
+
+###########################################################
+# Gamma distribution
+###########################################################
+message("")
+message("###########################################################")
+message("Brms fit with gamma distribution")
+brms_gamma <- brm(formula,
+                dat = dat,
+                family = Gamma(),
+                chains = nchains,
+                cores = nchains,
+		        control = list(adapt_delta = 0.9),
+                iter = its)
+brms_gamma <- add_criterion(brms_gamma,
+                            c("loo", "waic", "R2"))
+print(brms_gamma)
+print(bayes_R2(brms_gamma))
+
+message("")
+message("###########################################################")
+message("Compare models")
+
+loo_compare_loo <- loo_compare(brms_normal, brms_frechet,
+                                brms_lognormal, brms_gamma,
+                                brms_extval,
+                            criterion = "loo")
+loo_compare_waic <- loo_compare(brms_normal, brms_frechet,
+                                brms_lognormal, brms_gamma,
+                                brms_extval,
+                            criterion = "waic")
+print(loo_compare_loo)
+print(loo_compare_waic)
 
 message("")
 message("###########################################################")
 message("Saving file")
+
+out <- list(normal = brms_normal,
+            frechet = brms_frechet,
+            lognormal = brms_lognormal,
+            gamma = brms_gamma,
+            extval = brms_extval,
+            model_comparison_loo = loo_compare_loo,
+            model_comparison_waic = loo_compare_waic)
+
 saveRDS(out, args$output)
