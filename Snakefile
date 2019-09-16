@@ -27,7 +27,8 @@ rule all:
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
         "results/dataforfigures/oesophagusfit-SSB.csv",
         "results/dataforfigures/brmsfit.Rdata",
-        "results/oesophagus/sitednds_genes_hotspots.csv"
+        "results/oesophagus/sitednds_genes_hotspots.csv",
+        "results/dataforfigures/brmsfit-sites.Rdata"
 
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"

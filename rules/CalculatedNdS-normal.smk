@@ -20,6 +20,7 @@ rule CalculatedNdSNormal:
     shell:
         """
         module load R
+        module load gcc
         module load julia
         Rscript R/CalculatedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
@@ -53,6 +54,7 @@ rule MakeFilesSSB:
     shell:
         """
         module load R
+        module load gcc
         module load julia
         Rscript R/SSB-dNdS-files.R \
             --patientinfo {input.oesophaguspatientinfo} \
@@ -79,6 +81,7 @@ rule CalculateSitedNdSNormal:
     shell:
         """
         module load R/3.5.3
+        module load gcc
         Rscript R/CalculatesitedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
