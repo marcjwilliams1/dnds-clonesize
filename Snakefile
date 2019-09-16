@@ -26,7 +26,8 @@ rule all:
         expand(directory("results/oesophagus/SSBfiles/{oes_sample}/"), oes_sample=OES_SAMPLES),
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
         "results/dataforfigures/oesophagusfit-SSB.csv",
-        "results/dataforfigures/brmsfit.Rdata"
+        "results/dataforfigures/brmsfit.Rdata",
+        "results/oesophagus/sitednds_genes_hotspots.csv"
 
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"

@@ -63,3 +63,29 @@ rule MakeFilesSSB:
             --minarea {params.minarea} \
             --maxarea {params.maxarea}
         """
+
+rule CalculateSitedNdSNormal:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+    output:
+        oesophagusdnds="results/oesophagus/sitednds.csv",
+        oesophagusdndsgenes="results/oesophagus/sitednds_genes.csv",
+        oesophagushotspots="results/oesophagus/sitednds_genes_hotspots.csv",
+    params:
+        step=config["idndslimits"]["step"],
+        minarea=config["idndslimits"]["minarea"],
+        maxarea=config["idndslimits"]["maxarea"]
+    shell:
+        """
+        module load R/3.5.3
+        Rscript R/CalculatesitedNdS-normal.R \
+            --patientinfo {input.oesophaguspatientinfo} \
+            --oesophagusdata {input.oesophagusdata} \
+            --oesophagusdnds {output.oesophagusdnds} \
+            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
+            --hotspots {output.oesophagushotspots} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+        """
