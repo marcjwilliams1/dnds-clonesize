@@ -1,6 +1,7 @@
 #load packages, you will need to install these if you don't have them already
 library(cowplot)
 library(tidyverse)
+library(readxl)
 theme_set(theme_cowplot())
 library(jcolors)
 library(brms)

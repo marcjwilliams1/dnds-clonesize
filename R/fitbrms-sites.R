@@ -1,9 +1,9 @@
 #load packages, you will need to install these if you don't have them already
+library(brms)
 library(cowplot)
 library(tidyverse)
 theme_set(theme_cowplot())
 library(jcolors)
-library(brms)
 
 library(argparse)
 
@@ -14,6 +14,8 @@ parser$add_argument('--oesophagusmetadata', type='character',
                     help=" oesophagus meta data")
 parser$add_argument('--output', type='character',
                     help=" oesophagus meta data")
+parser$add_argument('--threads', type='integer',
+                    help="Number of threads", default = 1)
 args <- parser$parse_args()
 
 
@@ -30,7 +32,7 @@ dat <- df %>%
   filter(impact != "Synonymous", aachange != ".")
 
 message("Define brms paramters")
-nchains <- 4
+nchains <- args$threads
 its <- 5000
 formula <- bf(area ~ (1 + Age2|aachange))
 
@@ -47,7 +49,11 @@ for (g in genes){
     message("###########################################################")
     message(paste0("Gene: ", g))
     dattemp <- dat %>%
-                filter(gene == g)
+                filter(gene == g) %>%
+                group_by(aachange) %>%
+                mutate(n = n()) %>%
+                ungroup() %>%
+                filter(n > 4)
     brms_frechet <- brm(formula,
                     dat = dat,
                     family = frechet(),

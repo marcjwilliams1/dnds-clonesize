@@ -26,14 +26,17 @@ parser$add_argument('--maxarea', type = 'double',
 args <- parser$parse_args()
 
 args$step <- 1 * args$step
+args$minarea <- 3 * args$minarea
 
 message("Read in meta data for the oesophagus")
 dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
-  dplyr::rename(patient = PD)
+  dplyr::rename(patient = PD) %>%
+  filter(!patient %in% c("PD30987", "PD30986", "PD30988", "PD30273"))
 
 message("Read in mutation data for the oesophagus")
 df <- read_csv(args$oesophagusdata) %>%
-  mutate(sumvaf = sumvaf * 2)
+  mutate(sumvaf = sumvaf * 2)  %>%
+  filter(!donor %in% c("PD30987", "PD30986", "PD30988", "PD30273"))
 
 message("Create vector of intervals for i-dN/dS")
 minarea <- args$minarea
@@ -50,7 +53,7 @@ df.hotspots <- data.frame()
 i <- 1
 
 message("Calculate global and per gene i-dN/dS per patient")
-for (p in unique(df$donor)){
+for (p in rev(unique(df$donor))){
   message(paste0("Analysing patient ", p, "(patient ", i, "/", length(unique(df$donor)), " )"))
   for (cutoff in areacutoff){
     message(paste0("Max area is ", cutoff))
@@ -75,7 +78,8 @@ for (p in unique(df$donor)){
     } else {
         message(paste0("Number of reccurent mutations: ", length(hotspots_res$recursites$chr)))
         hotspots <- hotspots_res$recursites %>%
-          mutate(areacutoff = cutoff, patient = p)
+          mutate(areacutoff = cutoff, patient = p,
+                 nmuts = length(hotspots_res$recursites$chr))
         df.hotspots <- bind_rows(df.hotspots, hotspots)
     }
   }
