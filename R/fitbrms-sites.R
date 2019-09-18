@@ -13,7 +13,7 @@ parser$add_argument('--oesophagusdata', type='character',
 parser$add_argument('--oesophagusmetadata', type='character',
                     help=" oesophagus meta data")
 parser$add_argument('--output', type='character',
-                    help=" oesophagus meta data")
+                    help="oesophagus meta data")
 parser$add_argument('--threads', type='integer',
                     help="Number of threads", default = 1)
 args <- parser$parse_args()
@@ -28,16 +28,16 @@ df <- left_join(df, donor)
 message("Create data set")
 
 dat <- df %>%
-  mutate(area= 2*sumvaf) %>%
+  mutate(area= 2 * sumvaf) %>%
   filter(impact != "Synonymous", aachange != ".")
 
 message("Define brms paramters")
 nchains <- args$threads
-its <- 5000
+its <- 10000
 formula <- bf(area ~ (1 + Age2|aachange))
 
 genes <- c("NOTCH1", "TP53")
-output <- list()
+out <- list()
 
 ###########################################################
 # Frechet distribution
@@ -65,12 +65,11 @@ for (g in genes){
                                 c("loo", "waic", "R2"))
     print(brms_frechet)
     print(bayes_R2(brms_frechet))
-    output[[g]] <- brms_frechet
-    message("")
+    out[[g]] <- brms_frechet
 }
 
 message("")
 message("###########################################################")
 message("Saving file")
 
-saveRDS(output, args$output)
+saveRDS(out, args$output)

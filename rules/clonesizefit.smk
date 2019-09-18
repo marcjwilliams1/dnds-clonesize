@@ -71,7 +71,7 @@ rule clonesizedata:
         module unload python
         module load singularity
         singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-sims.R \
+            Rscript R/fitclonesize-data.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
             --output {output} \
