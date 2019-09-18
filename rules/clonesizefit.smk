@@ -77,3 +77,24 @@ rule clonesizedata:
             --output {output} \
             --threads {threads}
         """
+
+rule clonesizedatacompare:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+    output:
+        "results/dataforfigures/data-clonesizefit-models.Rdata"
+    threads: 4
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+            Rscript R/fitclonesize-data-compare.R \
+            --oesophagusdata {input.oesophagusdata} \
+            --oesophagusmetadata {input.oesophaguspatientinfo} \
+            --output {output} \
+            --threads {threads}
+        """

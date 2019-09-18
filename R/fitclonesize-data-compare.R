@@ -1,0 +1,141 @@
+library(brms)
+library(tidyverse)
+library(jcolors)
+library(argparse)
+
+parser <- ArgumentParser(description = "Fit brms models")
+parser$add_argument('--oesophagusdata', type='character',
+                    help="Mutations and VAF for oesophagus data")
+parser$add_argument('--oesophagusmetadata', type='character',
+                    help=" oesophagus meta data")
+parser$add_argument('--output', type='character',
+                    help=" oesophagus meta data")
+parser$add_argument('--threads', type='integer',
+                    help="Number of threads", default = 1)
+parser$add_argument('--rho', type='double',
+                    help="Progenitor density", default = 5000.0)
+parser$add_argument('--binsize', type='double',
+                    help="Binsize for fitting", default = 0.003)
+parser$add_argument('--its', type='integer',
+                    help="Progenitor density", default = 5000)
+parser$add_argument('--minvaf', type='double',
+                    help="Progenitor density", default = 0.008)
+args <- parser$parse_args()
+
+
+message("Read in data")
+df <- read_csv(args$oesophagusdata)
+donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+  dplyr::rename(donor = PD)
+df <- left_join(df, donor)
+
+df <- df %>%
+    filter(sumvaf > args$minvaf)
+
+# Functions to calculate ground truth
+
+midcut<-function(x,from,to,by){
+  ## cut the data into bins...
+  x=cut(x,seq(from,to,by),include.lowest=T, right = F)
+  ## make a named vector of the midpoints, names=binnames
+  vec=seq(from+by/2,to-by/2,by)
+  #vec=seq(from,to,by)
+  names(vec)=levels(x)
+  ## use the vector to map the names of the bins to the midpoint values
+  unname(vec[x])
+}
+
+message("")
+message("###########################################################")
+message("Fit model for age")
+
+mydat <- df %>%
+  filter(impact != "Synonymous") %>%
+  mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  group_by(Age, nidx) %>%
+  summarise(C = n()) %>%
+  ungroup() %>%
+  rename(n = nidx) %>%
+  complete(Age, nesting(n), fill = list(C = 0)) %>%
+  filter(C > 1)
+
+message("Fit model 1: 1/n with exponential...")
+prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+  prior(normal(0, 5), nlpar = "B")
+nchains <- args$threads
+fitmodel1 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
+               A ~ 1 + (1|Age),
+               B ~ 1 + (1|Age),
+               nl = TRUE),
+            data = mydat,
+            prior = prior1,
+            family = gaussian,
+            control = list(adapt_delta = 0.9),
+            chains = nchains,
+            iter = args$its)
+
+fitmodel1 <- add_criterion(fitmodel1, c("loo", "waic", "R2"))
+print(fitmodel1)
+print(bayes_R2(fitmodel1))
+
+message("Fit model 2: exponential...")
+prior2 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+  prior(normal(0, 5), nlpar = "B")
+nchains <- args$threads
+fitmodel2 <- brm(bf(C ~ (A) * exp(-n / exp(B)),
+               A ~ 1 + (1|Age),
+               B ~ 1 + (1|Age),
+               nl = TRUE),
+            data = mydat,
+            prior = prior1,
+            family = gaussian,
+            control = list(adapt_delta = 0.9),
+            chains = nchains,
+            iter = args$its)
+
+fitmodel2 <- add_criterion(fitmodel2, c("loo", "waic", "R2"))
+print(fitmodel2)
+print(bayes_R2(fitmodel2))
+
+message("Fit model 3: 1/n power law...")
+prior3 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+  prior(normal(0, 5), nlpar = "B")
+nchains <- args$threads
+fitmodel2 <- brm(bf(C ~ (A/n)),
+               A ~ 1 + (1|Age),
+               B ~ 1 + (1|Age),
+               nl = TRUE),
+            data = mydat,
+            prior = prior3,
+            family = gaussian,
+            control = list(adapt_delta = 0.9),
+            chains = nchains,
+            iter = args$its)
+
+fitmodel3 <- add_criterion(fitmodel3, c("loo", "waic", "R2"))
+print(fitmodel3)
+print(bayes_R2(fitmodel3))
+
+message("")
+message("###########################################################")
+message("Compare models")
+
+modellist <- list(fullmodel = model1,
+            exponential = model2,
+            powerlaw = model3)
+
+loo_compare_loo <- loo_compare(modellist$powerlaw,
+                               modellist$fullmodel,
+                               modellist$exponential,
+                               criterion = "loo")
+loo_compare_waic <- loo_compare(modellist$powerlaw,
+                               modellist$fullmodel,
+                               modellist$exponential,
+                               criterion = "waic")
+print(loo_compare_loo)
+print(loo_compare_waic)
+
+message("")
+message("###########################################################")
+message("Saving file")
+saveRDS(modellist, args$output)
