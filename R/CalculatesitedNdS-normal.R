@@ -25,7 +25,7 @@ parser$add_argument('--maxarea', type = 'double',
                     help="Min area for interval dN/dS")
 args <- parser$parse_args()
 
-args$step <- 1 * args$step
+args$step <- 3 * args$step
 args$minarea <- 3 * args$minarea
 
 message("Read in meta data for the oesophagus")

@@ -53,7 +53,7 @@ for (g in genes){
                 group_by(aachange) %>%
                 mutate(n = n()) %>%
                 ungroup() %>%
-                filter(n > 4)
+                filter(n > 7)
     brms_frechet <- brm(formula,
                     dat = dat,
                     family = frechet(),

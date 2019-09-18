@@ -115,6 +115,7 @@ fitgene <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             family = gaussian,
             control = list(adapt_delta = 0.9),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitgene<- add_criterion(fitgene, c("loo", "waic", "R2"))
@@ -153,8 +154,9 @@ fitgeneage <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             data = mydat,
             prior = prior1,
             family = gaussian,
-            control = list(adapt_delta = 0.9),
+            control = list(adapt_delta = 0.99),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitgeneage <- add_criterion(fitgeneage, c("loo", "waic", "R2"))
@@ -164,5 +166,5 @@ print(bayes_R2(fitgeneage))
 message("")
 message("###########################################################")
 message("Saving file")
-saveRDS(list(gene = fitgene, age = fitage,
-            geneage = fitgeneage), args$output)
+out<- list(gene = fitgene, age = fitage, geneage = fitgeneage)
+saveRDS(out, args$output)

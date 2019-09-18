@@ -30,7 +30,8 @@ rule all:
         "results/oesophagus/sitednds_genes_hotspots.csv",
         "results/dataforfigures/brmsfit-sites.Rdata",
         "results/dataforfigures/simulation-clonesizefit.Rdata",
-        "results/dataforfigures/data-clonesizefit.Rdata"
+        "results/dataforfigures/data-clonesizefit.Rdata",
+        "results/dataforfigures/data-clonesizefit-models.Rdata"
 
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"

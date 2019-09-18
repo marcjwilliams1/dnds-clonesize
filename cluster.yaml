@@ -122,6 +122,12 @@ clonesizedata:
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
 
+clonesizedatacompare:
+    time: "10:00:00"
+    mem: 8G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
 clonesizesims:
     time: "10:00:00"
     mem: 8G

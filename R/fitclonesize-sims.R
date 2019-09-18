@@ -92,7 +92,8 @@ fit <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             prior = prior1,
             family = gaussian,
             control = list(adapt_delta = 0.9),
-            chains = 4,
+            chains = nchains,
+            cores = nchains,
             iter = its)
 
 fit <- add_criterion(fit, c("loo", "waic", "R2"))

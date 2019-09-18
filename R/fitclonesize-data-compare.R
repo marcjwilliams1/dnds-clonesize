@@ -72,6 +72,7 @@ fitmodel1 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             family = gaussian,
             control = list(adapt_delta = 0.9),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitmodel1 <- add_criterion(fitmodel1, c("loo", "waic", "R2"))
@@ -87,10 +88,11 @@ fitmodel2 <- brm(bf(C ~ (A) * exp(-n / exp(B)),
                B ~ 1 + (1|Age),
                nl = TRUE),
             data = mydat,
-            prior = prior1,
+            prior = prior2,
             family = gaussian,
             control = list(adapt_delta = 0.9),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitmodel2 <- add_criterion(fitmodel2, c("loo", "waic", "R2"))
@@ -101,7 +103,7 @@ message("Fit model 3: 1/n power law...")
 prior3 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
 nchains <- args$threads
-fitmodel2 <- brm(bf(C ~ (A/n)),
+fitmodel3 <- brm(bf(C ~ (A/n)),
                A ~ 1 + (1|Age),
                B ~ 1 + (1|Age),
                nl = TRUE),
@@ -110,6 +112,7 @@ fitmodel2 <- brm(bf(C ~ (A/n)),
             family = gaussian,
             control = list(adapt_delta = 0.9),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitmodel3 <- add_criterion(fitmodel3, c("loo", "waic", "R2"))
