@@ -13,7 +13,7 @@ parser$add_argument('--threads', type='integer',
 parser$add_argument('--rho', type='double',
                     help="Progenitor density", default = 5000.0)
 parser$add_argument('--binsize', type='double',
-                    help="Progenitor density", default = 0.002)
+                    help="Binsize for fitting", default = 0.002)
 args <- parser$parse_args()
 
 

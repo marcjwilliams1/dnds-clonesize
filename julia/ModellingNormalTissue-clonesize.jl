@@ -15,6 +15,7 @@ s = ArgParseSettings()
 end
 
 parsed_args = parse_args(ARGS, s)
+print(parsed_args)
 
 
 #function to simulate population of cells with different paramters
@@ -55,4 +56,4 @@ for Δ in [0.0, 0.025, 0.05, 0.1]
 end
 #CSV.write("file.csv", myDF)
 
-CSV.write(parsed_args[:resultsfile], myDF)
+CSV.write(parsed_args["resultsfile"], myDF)

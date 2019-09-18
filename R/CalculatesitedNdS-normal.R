@@ -31,12 +31,12 @@ args$minarea <- 3 * args$minarea
 message("Read in meta data for the oesophagus")
 dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
   dplyr::rename(patient = PD) %>%
-  filter(!patient %in% c("PD30987", "PD30986", "PD30988", "PD30273"))
+  filter(!patient %in% c("PD30987", "PD30986", "PD30988", "PD30273", "PD30274"))
 
 message("Read in mutation data for the oesophagus")
 df <- read_csv(args$oesophagusdata) %>%
   mutate(sumvaf = sumvaf * 2)  %>%
-  filter(!donor %in% c("PD30987", "PD30986", "PD30988", "PD30273"))
+  filter(!donor %in% c("PD30987", "PD30986", "PD30988", "PD30273", "PD30274"))
 
 message("Create vector of intervals for i-dN/dS")
 minarea <- args$minarea

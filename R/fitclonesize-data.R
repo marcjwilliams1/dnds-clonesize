@@ -15,7 +15,7 @@ parser$add_argument('--threads', type='integer',
 parser$add_argument('--rho', type='double',
                     help="Progenitor density", default = 5000.0)
 parser$add_argument('--binsize', type='double',
-                    help="Progenitor density", default = 0.003)
+                    help="Bin size for fitting", default = 0.003)
 parser$add_argument('--its', type='integer',
                     help="Progenitor density", default = 5000)
 parser$add_argument('--minvaf', type='double',
@@ -57,7 +57,7 @@ mydat <- df %>%
   ungroup() %>%
   rename(n = nidx) %>%
   complete(Age, nesting(n), fill = list(C = 0)) %>%
-  filter(C > 2)
+  filter(C > 1)
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
@@ -98,7 +98,8 @@ mydat <- df %>%
   ungroup() %>%
   rename(n = nidx) %>%
   complete(gene, nesting(n), fill = list(C = 0)) %>%
-  filter(C > 0)
+  filter(C > 0) %>%
+  filter(!is.na(n))
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
@@ -132,14 +133,15 @@ mydat <- df %>%
   ungroup() %>%
   filter(nmuts > 9) %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
-  group_by(gene, nidx) %>%
+  group_by(gene, Age2, nidx) %>%
   summarise(C = n()) %>%
   ungroup() %>%
   rename(n = nidx) %>%
-  complete(gene, nesting(n), fill = list(C = 0)) %>%
-  filter(C > 0)
+  complete(gene, Age2, nesting(n), fill = list(C = 0)) %>%
+  filter(C > 0) %>%
+  filter(!is.na(n))
 
-prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.00001) +
   prior(normal(0, 5), nlpar = "B")
 nchains <- args$threads
 
