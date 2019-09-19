@@ -52,6 +52,8 @@ midcut<-function(x,from,to,by){
 mydat <- sims %>%
   mutate(fidx = midcut(A, args$binsize, 1, args$binsize)) %>%
   filter(!is.na(fidx)) %>%
+  group_by(condition) %>%
+  mutate(maxA = maximum(A)) %>%
   group_by(fidx, gene, delta, rlam, t, Nsims, mu, N0, condition) %>%
   summarise(C = n()) %>%
   ungroup() %>%
@@ -72,7 +74,7 @@ mydat <- sims %>%
   mutate(Ptheory = (1 / n) * (1 / log(B)) * exp(-n / B)) %>%
   mutate(Ptheory = Ptheory / sum(Ptheory)) %>%
   ungroup() %>%
-  filter(C > 5)
+  filter(n < maxA)
 
 params <- distinct(mydat, gene, condition, A, logB, B) %>%
   mutate(condition = paste0("condition", condition))
