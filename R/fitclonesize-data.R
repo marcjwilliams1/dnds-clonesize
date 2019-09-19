@@ -15,7 +15,7 @@ parser$add_argument('--threads', type='integer',
 parser$add_argument('--rho', type='double',
                     help="Progenitor density", default = 5000.0)
 parser$add_argument('--binsize', type='double',
-                    help="Bin size for fitting", default = 0.003)
+                    help="Bin size for fitting", default = 0.005)
 parser$add_argument('--its', type='integer',
                     help="Progenitor density", default = 5000)
 parser$add_argument('--minvaf', type='double',
@@ -52,6 +52,7 @@ message("Fit model for age")
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  filter(!is.na(nidx)) %>%
   group_by(Age, nidx) %>%
   summarise(C = n()) %>%
   ungroup() %>%
@@ -83,6 +84,43 @@ print(bayes_R2(fitage))
 
 message("")
 message("###########################################################")
+message("Fit model for age synonymous")
+
+mydat <- df %>%
+  filter(impact == "Synonymous") %>%
+  mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  filter(!is.na(nidx)) %>%
+  group_by(Age, nidx) %>%
+  summarise(C = n()) %>%
+  ungroup() %>%
+  rename(n = nidx) %>%
+  complete(Age, nesting(n), fill = list(C = 0)) %>%
+  filter(C > 1)
+
+prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+  prior(normal(0, 5), nlpar = "B")
+nchains <- args$threads
+
+message("Fit model...")
+fitagesynon <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
+               A ~ 1 + (1|Age),
+               B ~ 1 + (1|Age),
+               nl = TRUE),
+            data = mydat,
+            prior = prior1,
+            family = gaussian,
+            control = list(adapt_delta = 0.9),
+            chains = nchains,
+            iter = args$its)
+
+fitagesynon <- add_criterion(fitagesynon, c("loo", "waic", "R2"))
+print(fitagesynon)
+print(bayes_R2(fitagesynon))
+
+
+
+message("")
+message("###########################################################")
 message("Fit model pergene")
 
 mydat <- df %>%
@@ -93,6 +131,7 @@ mydat <- df %>%
   ungroup() %>%
   filter(nmuts > 9) %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  filter(!is.na(nidx)) %>%
   group_by(gene, nidx) %>%
   summarise(C = n()) %>%
   ungroup() %>%
@@ -134,6 +173,7 @@ mydat <- df %>%
   ungroup() %>%
   filter(nmuts > 9) %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  filter(!is.na(nidx)) %>%
   group_by(gene, Age2, nidx) %>%
   summarise(C = n()) %>%
   ungroup() %>%
@@ -166,5 +206,7 @@ print(bayes_R2(fitgeneage))
 message("")
 message("###########################################################")
 message("Saving file")
-out<- list(gene = fitgene, age = fitage, geneage = fitgeneage)
+out<- list(gene = fitgene, age = fitage,
+           geneage = fitgeneage,
+            agesynon = fitagesynon)
 saveRDS(out, args$output)

@@ -7,7 +7,7 @@ parser <- ArgumentParser(description = "Fit brms models")
 parser$add_argument('--simulationdata', type='character',
                     help="Simulation data for clone sizes")
 parser$add_argument('--output', type='character',
-                    help=" oesophagus meta data")
+                    help="Output file")
 parser$add_argument('--threads', type='integer',
                     help="Number of threads", default = 1)
 parser$add_argument('--rho', type='double',

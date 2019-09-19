@@ -15,7 +15,7 @@ parser$add_argument('--threads', type='integer',
 parser$add_argument('--rho', type='double',
                     help="Progenitor density", default = 5000.0)
 parser$add_argument('--binsize', type='double',
-                    help="Binsize for fitting", default = 0.003)
+                    help="Binsize for fitting", default = 0.005)
 parser$add_argument('--its', type='integer',
                     help="Progenitor density", default = 5000)
 parser$add_argument('--minvaf', type='double',
@@ -52,6 +52,7 @@ message("Fit model for age")
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  filter(!is.na(nidx)) %>%
   group_by(Age, nidx) %>%
   summarise(C = n()) %>%
   ungroup() %>%
@@ -100,20 +101,18 @@ print(fitmodel2)
 print(bayes_R2(fitmodel2))
 
 message("Fit model 3: 1/n power law...")
-prior3 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
-  prior(normal(0, 5), nlpar = "B")
+prior3 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001)
 nchains <- args$threads
-fitmodel3 <- brm(bf(C ~ (A/n)),
+fitmodel3 <- brm(bf(C ~ (A/n),
                A ~ 1 + (1|Age),
-               B ~ 1 + (1|Age),
                nl = TRUE),
-            data = mydat,
-            prior = prior3,
-            family = gaussian,
-            control = list(adapt_delta = 0.9),
-            chains = nchains,
-            cores = nchains,
-            iter = args$its)
+               data = mydat,
+               prior = prior3,
+               family = gaussian,
+               control = list(adapt_delta = 0.9),
+               chains = nchains,
+               cores = nchains,
+               iter = args$its)
 
 fitmodel3 <- add_criterion(fitmodel3, c("loo", "waic", "R2"))
 print(fitmodel3)
@@ -123,9 +122,9 @@ message("")
 message("###########################################################")
 message("Compare models")
 
-modellist <- list(fullmodel = model1,
-            exponential = model2,
-            powerlaw = model3)
+modellist <- list(fullmodel = fitmodel1,
+            exponential = fitmodel2,
+            powerlaw = fitmodel3)
 
 loo_compare_loo <- loo_compare(modellist$powerlaw,
                                modellist$fullmodel,

@@ -33,7 +33,7 @@ dat <- df %>%
 
 message("Define brms paramters")
 nchains <- args$threads
-its <- 10000
+its <- 20000
 formula <- bf(area ~ (1 + Age2|aachange))
 
 genes <- c("NOTCH1", "TP53")

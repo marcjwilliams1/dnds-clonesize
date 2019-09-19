@@ -7,6 +7,7 @@ using Random
 using StatsBase
 using ArgParse
 using CSV
+using Distributions
 
 s = ArgParseSettings()
 @add_arg_table s begin
@@ -43,7 +44,7 @@ for Δ in [0.0, 0.025, 0.05, 0.1]
     for t in [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
         println("Δ = $Δ, t = $t")
         Nsims = 1000
-        mu = 0.001
+        mu = rand(TruncatedNormal(0.001, 0.0005, 0.0, 10.0))
         N0 = 1000
         freq = simulatepopulation(;Δ = Δ, tend = t,
                                     λ = 0.5, r = 1.0,
