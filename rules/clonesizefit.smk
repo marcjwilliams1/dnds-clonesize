@@ -20,7 +20,8 @@ rule brmssites:
         oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
         oesophagusdata="data/oesophagus/esophagus.csv",
     output:
-        "results/dataforfigures/brmsfit-sites.Rdata"
+        fits = "results/dataforfigures/brmsfit-sites.Rdata",
+        coefficients = "results/dataforfigures/brmsfit-sites-coef.Rdata"
     threads: 4
     params:
         singularityimage=config["stansingularity"]
@@ -34,7 +35,8 @@ rule brmssites:
             Rscript R/fitbrms-sites.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
-            --output {output} \
+            --output {output.fits} \
+            --outputcoef {output.coefficients} \
             --threads {threads}
         """
 

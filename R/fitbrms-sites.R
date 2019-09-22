@@ -13,7 +13,9 @@ parser$add_argument('--oesophagusdata', type='character',
 parser$add_argument('--oesophagusmetadata', type='character',
                     help=" oesophagus meta data")
 parser$add_argument('--output', type='character',
-                    help="oesophagus meta data")
+                    help="Output file for brms fits")
+parser$add_argument('--outputcoef', type='character',
+                    help="Output file for coefficients")
 parser$add_argument('--threads', type='integer',
                     help="Number of threads", default = 1)
 args <- parser$parse_args()
@@ -35,11 +37,12 @@ message(summary(dat))
 
 message("Define brms paramters")
 nchains <- args$threads
-its <- 20000
-formula <- bf(area ~ (1 + Age2|aachange))
+its <- 5000
+formula <- bf(area ~ (Age2 + Age2|aachange))
 
 genes <- c("NOTCH1", "TP53")
 out <- list()
+outcoef <- list()
 
 ###########################################################
 # Frechet distribution
@@ -59,7 +62,7 @@ for (g in genes){
     message(summary(dattemp))
     brms_frechet <- brm(formula,
                     dat = dattemp,
-                    family = frechet(),
+                    family = lognormal(),
                     chains = nchains,
                     cores = nchains,
     		        control = list(adapt_delta = 0.8),
@@ -69,6 +72,14 @@ for (g in genes){
     print(brms_frechet)
     print(bayes_R2(brms_frechet))
     out[[g]] <- brms_frechet
+
+    frechetCoef <- modelfits$lognormal %>%
+      spread_draws(r_aachange[gene, var], b_Age2) %>%
+      filter(var == "Age2") %>%
+      median_qi(coef = r_aachange + b_Age2) %>%
+      arrange(desc(coef))
+    outcoef[[g]] <- frechetCoef
+    message(head(outcoef[[g]]))
 }
 
 message("")
@@ -76,3 +87,4 @@ message("###########################################################")
 message("Saving file")
 
 saveRDS(out, args$output)
+saveRDS(outcoef, args$outputcoef)
