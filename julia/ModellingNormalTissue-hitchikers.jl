@@ -52,14 +52,14 @@ function simulatepopulation(;Δ = 0.0, ρ = 100.0, Amin = 1 ./ ρ, gap = 0.02,
 end
 
 
-myDF = DataFrame([Int64, Int64, Int64, Int64, Int64, Int64, Int64, Float64, Float64, Float64], [:CnNS, :CnS, :CnSI, :CnSH, :n, :Nsims, :N0, :muNS, :muS, :tend], 0)
+myDF = DataFrame([Float64, String, Int64, Int64, Float64, Float64, Float64], [:f, :muttype, :Nsims, :N0, :muNS, :muS, :tend], 0)
 
 
 for m in [0.0001, 0.001, 0.01]
     println("Mutation rate = $m")
     for t in [21.5, 25.5, 37.5, 45.5, 49.5, 53.5, 57.5, 69.5, 73.5]
         println("Time = $t")
-        delta = 0.1
+        delta = 0.05
         Nsims = 10^4
         tend = t
         μd = m
@@ -67,11 +67,13 @@ for m in [0.0001, 0.001, 0.01]
         N0 = 10^3
         freq, nend, Cnt, vaf, h = simulatepopulation(Nits = Nsims, Δ = delta, tend = tend, μd = μd, μp = μp, N0 = N0);
         nmax = 10000
-        DF = DataFrame(CnNS = counts(convert(Array{Int64, 1}, freq[1]), nmax),
-                       CnS = counts(convert(Array{Int64, 1}, freq[2]), nmax),
-                       CnSI = counts(convert(Array{Int64, 1}, h[1]), nmax),
-                       CnSH = counts(convert(Array{Int64, 1}, h[2]), nmax),
-                       n = 1:nmax)
+        if length(h[2]) == 0
+            h2 = [0.0]
+        end
+        DF = DataFrame(f = freq[1], muttype = "NonSyn")
+        append!(DF, DataFrame(f = freq[2], muttype = "Syn"))
+        append!(DF, DataFrame(f = h[1], muttype = "SynInd"))
+        append!(DF, DataFrame(f = h[2], muttype = "SynHitch"))
         DF[:Nsims] = Nsims
         DF[:N0] = N0
         DF[:muNS] = μd

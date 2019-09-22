@@ -11,6 +11,10 @@ source /data/home/hfx042/bin/snakemake/bin/activate
 
 snakemake --unlock
 
+#snakemake --jobs 80 \
+#  --cluster-config cluster.yaml \
+#  --cluster "qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o #{cluster.output} -j y -N {cluster.name} -pe smp {threads}"
+
 snakemake --jobs 80 \
   --cluster-config cluster.yaml \
-  --cluster "qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o {cluster.output} -j y -N {cluster.name} -pe smp {threads}"
+  --cluster "qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o {cluster.output} -j y -N {cluster.name} -pe smp {threads} -l node_type=nxv"
