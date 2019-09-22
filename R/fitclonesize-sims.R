@@ -53,8 +53,8 @@ mydat <- sims %>%
   mutate(fidx = midcut(A, args$binsize, 1, args$binsize)) %>%
   filter(!is.na(fidx)) %>%
   group_by(condition) %>%
-  mutate(maxA = maximum(A)) %>%
-  group_by(fidx, gene, delta, rlam, t, Nsims, mu, N0, condition) %>%
+  mutate(maxA = max(A)) %>%
+  group_by(fidx, gene, delta, rlam, t, Nsims, mu, N0, condition, maxA) %>%
   summarise(C = n()) %>%
   ungroup() %>%
   rename(n = fidx) %>%

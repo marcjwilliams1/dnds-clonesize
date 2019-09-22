@@ -35,7 +35,7 @@ dat <- df %>%
 message("Define brms paramters")
 nchains <- 4
 its <- 5000
-formula <- bf(area ~ (1 + Age2|gene1))
+formula <- bf(area ~ Age2 + (1 + Age2|gene1))
 
 ###########################################################
 # Log normal distribution
@@ -84,30 +84,12 @@ brms_frechet <- brm(formula,
                 family = frechet(),
                 chains = nchains,
                 cores = nchains,
-		        control = list(adapt_delta = 0.8),
+		            control = list(adapt_delta = 0.8),
                 iter = its)
 brms_frechet <- add_criterion(brms_frechet,
                             c("loo", "waic", "R2"))
 print(brms_frechet)
 print(bayes_R2(brms_frechet))
-
-###########################################################
-# Generalized extreme value distribution
-###########################################################
-message("")
-message("###########################################################")
-message("Brms fit with generalized extreme value distribution")
-brms_extval <- brm(formula,
-                dat = dat,
-                family = gen_extreme_value(),
-                chains = nchains,
-                cores = nchains,
-		        control = list(adapt_delta = 0.8),
-                iter = its)
-brms_extval <- add_criterion(brms_extval,
-                            c("loo", "waic", "R2"))
-print(brms_extval)
-print(bayes_R2(brms_extval))
 
 message("")
 message("###########################################################")
@@ -115,11 +97,9 @@ message("Compare models")
 
 loo_compare_loo <- loo_compare(brms_normal, brms_frechet,
                                 brms_lognormal,
-                                brms_extval,
                             criterion = "loo")
 loo_compare_waic <- loo_compare(brms_normal, brms_frechet,
                                 brms_lognormal,
-                                brms_extval,
                             criterion = "waic")
 print(loo_compare_loo)
 print(loo_compare_waic)
@@ -131,8 +111,16 @@ message("Saving file")
 out <- list(normal = brms_normal,
             frechet = brms_frechet,
             lognormal = brms_lognormal,
-            extval = brms_extval,
             model_comparison_loo = loo_compare_loo,
             model_comparison_waic = loo_compare_waic)
 
 saveRDS(out, args$output)
+
+
+#library(lme4)
+#formula <- bf(area ~ Age2 + (1 + Age2|gene1))
+
+#x <- lmer(log(area) ~ Age2 + (1 + Age2|gene1), data = dat %>% filter(impact == "Missense"))
+#as.data.frame(coef(x)$gene1) %>%
+  #rownames_to_column(., "gene") %>%
+  #arrange(desc(Age2))

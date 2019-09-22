@@ -20,6 +20,8 @@ parser$add_argument('--its', type='integer',
                     help="Progenitor density", default = 5000)
 parser$add_argument('--minvaf', type='double',
                     help="Progenitor density", default = 0.008)
+parser$add_argument('--quantile', type='double',
+                    help="quantile with which to filter data", default = 0.9)
 args <- parser$parse_args()
 
 
@@ -51,14 +53,18 @@ message("Fit model for age")
 
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
+  group_by(Age) %>%
+  mutate(maxvaf = quantile(sumvaf, args$quantile)) %>%
+  ungroup() %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
   filter(!is.na(nidx)) %>%
-  group_by(Age, nidx) %>%
+  group_by(Age, nidx, maxvaf) %>%
   summarise(C = n()) %>%
   ungroup() %>%
   rename(n = nidx) %>%
   complete(Age, nesting(n), fill = list(C = 0)) %>%
-  filter(C > 1)
+  #filter(C > 1) %>%
+  filter(n < maxvaf)
 
 message("Fit model 1: 1/n with exponential...")
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +

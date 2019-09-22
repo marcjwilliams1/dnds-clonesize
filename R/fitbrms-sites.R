@@ -29,7 +29,9 @@ message("Create data set")
 
 dat <- df %>%
   mutate(area= 2 * sumvaf) %>%
-  filter(impact != "Synonymous", aachange != ".")
+  filter(impact != "Synonymous", aachange != ".", aachange != "-")
+
+message(summary(dat))
 
 message("Define brms paramters")
 nchains <- args$threads
@@ -53,9 +55,10 @@ for (g in genes){
                 group_by(aachange) %>%
                 mutate(n = n()) %>%
                 ungroup() %>%
-                filter(n > 7)
+                filter(n > 1)
+    message(summary(dattemp))
     brms_frechet <- brm(formula,
-                    dat = dat,
+                    dat = dattemp,
                     family = frechet(),
                     chains = nchains,
                     cores = nchains,
