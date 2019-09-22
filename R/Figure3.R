@@ -3,7 +3,6 @@ library(cowplot)
 library(tidyverse)
 theme_set(theme_cowplot())
 library(jcolors)
-library(forcats)
 library(ggforce)
 library(Hmisc)
 

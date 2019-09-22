@@ -3,7 +3,8 @@ rule Figure1:
         figure="Figures/Figure1.pdf"
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/Figure1.R \
             --figure {output.figure}
         """
@@ -25,7 +26,8 @@ rule Figure2:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [1])
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/Figure2.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
@@ -57,7 +59,8 @@ rule Figure3:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [2,3,4,5])
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/Figure3.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
@@ -84,7 +87,8 @@ rule FigureS6:
         rsqcutoff=config["rsqcutoff"]
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/FigureS6.R \
             --figure {output.figure} \
             --suppfigures {output.suppfigures} \
@@ -108,7 +112,8 @@ rule Figurecomparednds:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [12,13])
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/Figure-comparednds.R \
             --suppfigures {output.suppfigures} \
             --SSB {input.SSB} \
@@ -126,8 +131,77 @@ rule Figurebinsize:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [14])
     shell:
         """
-        module load R
+        module load gcc
+        module load R/3.5.3
         Rscript R/Figure-binsize.R \
             --suppfigures {output.suppfigures} \
             --binsizesims {input.binsizesims}
+        """
+
+rule Figure4:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+        fits="results/dataforfigures/data-clonesizefit.Rdata",
+        modelfits="results/dataforfigures/data-clonesizefit-models.Rdata"
+    output:
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [16]),
+        figure="Figures/Figure4.pdf"
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+        Rscript R/Figure-clonesizedata.R \
+            --datafits {input.fits} \
+            --datamodelfits {input.modelfits} \
+            --figure {output.figure} \
+            --oesophagusdata {input.oesophagusdata} \
+            --oesophagusmetadata {input.oesophaguspatientinfo} \
+            --suppfigures {output.suppfigures}
+
+        """
+
+rule FigureCloneSizeData2:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        fits="results/dataforfigures/brmsfit.Rdata",
+        oesophagusfitmissense = "results/dataforfigures/oesophagusfitmissensepergene.csv",
+    output:
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [17, 18]),
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+        Rscript R/Figure-clonesizedata2.R \
+            --datafits {input.fits} \
+            --oesophagusfitmissense {input.oesophagusfitmissense} \
+            --oesophagusmetadata {input.oesophaguspatientinfo} \
+            --suppfigures {output.suppfigures}
+
+        """
+
+rule FigureCloneSizeSims:
+    input:
+        data="results/simulations/clonesize_overtime.csv",
+        fits="results/dataforfigures/simulation-clonesizefit.Rdata",
+    output:
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [15]),
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+        Rscript R/Figure-clonesizesims.R \
+            --simulationfits {input.fits} \
+            --simulationdata {input.data} \
+            --suppfigures {output.suppfigures}
+
         """
