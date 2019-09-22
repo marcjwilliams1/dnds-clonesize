@@ -31,7 +31,8 @@ rule all:
         "results/dataforfigures/brmsfit-sites.Rdata",
         "results/dataforfigures/simulation-clonesizefit.Rdata",
         "results/dataforfigures/data-clonesizefit.Rdata",
-        "results/dataforfigures/data-clonesizefit-models.Rdata"
+        "results/dataforfigures/data-clonesizefit-models.Rdata",
+        "results/simulations/clonesize_hitchikers.csv"
 
 include: "rules/ModellingNormalTissue.smk"
 include: "rules/CalculatedNdS-normal.smk"

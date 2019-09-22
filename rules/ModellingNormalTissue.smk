@@ -39,3 +39,13 @@ rule ModellingNormalTissueCloneSize:
         julia julia/ModellingNormalTissue-clonesize.jl \
             --resultsfile {output.resultsfile}
         """
+
+rule ModellingNormalTissueHitchikers:
+    output:
+        resultsfile="results/simulations/clonesize_hitchikers.csv"
+    shell:
+        """
+        module load julia
+        julia julia/ModellingNormalTissue-hitchikers.jl \
+            --resultsfile {output.resultsfile}
+        """
