@@ -167,4 +167,16 @@ message(paste0("Inferred population intercept coefficient: ", round(infval$b_A_I
                " (", round(infval$.lower, 3) , ", ", round(infval$.upper, 3), ")"))
 
 
-
+sims %>%
+  filter(delta == 0.0) %>%
+  group_by(t) %>%
+  summarise(x= n() / first(Nsims)) %>%
+  ggplot(aes(x = t, y = x)) + geom_point() +
+  scale_y_log10()#+geom_smooth(method = "lm")
+  
+f2 <- sims %>%
+  filter(delta == 0.0) %>%
+  group_by(t, mu) %>%
+  summarise(x= n() / first(Nsims))
+summary(lm(x~log(t), f2))  
+  

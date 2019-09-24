@@ -4,6 +4,7 @@ library(cowplot)
 library(tidyverse)
 theme_set(theme_cowplot())
 library(jcolors)
+library(tidybayes)
 
 library(argparse)
 
@@ -65,7 +66,7 @@ for (g in genes){
                     family = lognormal(),
                     chains = nchains,
                     cores = nchains,
-    		        control = list(adapt_delta = 0.8),
+    		        control = list(adapt_delta = 0.99),
                     iter = its)
     brms_frechet <- add_criterion(brms_frechet,
                                 c("loo", "waic", "R2"))
@@ -73,7 +74,7 @@ for (g in genes){
     print(bayes_R2(brms_frechet))
     out[[g]] <- brms_frechet
 
-    frechetCoef <- modelfits$lognormal %>%
+    frechetCoef <- brms_frechet %>%
       spread_draws(r_aachange[gene, var], b_Age2) %>%
       filter(var == "Age2") %>%
       median_qi(coef = r_aachange + b_Age2) %>%

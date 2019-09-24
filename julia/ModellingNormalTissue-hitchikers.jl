@@ -67,8 +67,17 @@ for m in [0.0001, 0.001, 0.01]
         N0 = 10^3
         freq, nend, Cnt, vaf, h = simulatepopulation(Nits = Nsims, Δ = delta, tend = tend, μd = μd, μp = μp, N0 = N0);
         nmax = 10000
+        if length(h[1]) == 0
+            h[1] = [0.0]
+        end
         if length(h[2]) == 0
-            h2 = [0.0]
+            h[2] = [0.0]
+        end
+        if length(freq[1]) == 0
+            freq[1] = [0.0]
+        end
+        if length(freq[2]) == 0
+            freq[2] = [0.0]
         end
         DF = DataFrame(f = freq[1], muttype = "NonSyn")
         append!(DF, DataFrame(f = freq[2], muttype = "Syn"))

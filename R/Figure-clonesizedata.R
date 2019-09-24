@@ -135,6 +135,7 @@ synonA <- fits$agesynon %>%
   mutate(type = "Synonymous")
 
 dfA <- bind_rows(nonsynA, synonA) %>%
+  mutate(condmean2 = condmean) %>%
   mutate(condmean = condmean / (binsize * totalarea))
 
 message("Regression on summaries for A parameters")
