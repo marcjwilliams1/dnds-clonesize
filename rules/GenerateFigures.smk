@@ -102,11 +102,11 @@ rule FigureS6:
 
 rule Figurecomparednds:
     input:
-        alldndscv = "results/dataforfigures/oesophagusfitall.csv",
-        dndscvfitmissense = "results/dataforfigures/oesophagusfitmissense.csv",
-        dndscvfitnonsense = "results/dataforfigures/oesophagusfitnonsense.csv",
-        dndscvfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene.csv",
-        dndscvfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene.csv",
+        alldndscv = "results/dataforfigures/oesophagusfitall_snv.csv",
+        dndscvfitmissense = "results/dataforfigures/oesophagusfitmissense_snv.csv",
+        dndscvfitnonsense = "results/dataforfigures/oesophagusfitnonsense_snv.csv",
+        dndscvfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene_snv.csv",
+        dndscvfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene_snv.csv",
         SSB = "results/dataforfigures/oesophagusfit-SSB.csv"
     output:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [12,13])

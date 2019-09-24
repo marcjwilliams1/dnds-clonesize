@@ -39,7 +39,7 @@ message(summary(dat))
 message("Define brms paramters")
 nchains <- args$threads
 its <- 5000
-formula <- bf(area ~ (Age2 + Age2|aachange))
+formula <- bf(area ~ Age2 + (1 + Age2|aachange))
 
 genes <- c("NOTCH1", "TP53")
 out <- list()
@@ -59,7 +59,7 @@ for (g in genes){
                 group_by(aachange) %>%
                 mutate(n = n()) %>%
                 ungroup() %>%
-                filter(n > 1)
+                filter(n > 3)
     message(summary(dattemp))
     brms_frechet <- brm(formula,
                     dat = dattemp,

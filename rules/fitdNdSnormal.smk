@@ -44,6 +44,52 @@ rule fitdNdSnormal:
             --oesophagusfitneutral {output.oesophagusfitneutral}
         """
 
+rule fitdNdSnormalSNV:
+    input:
+        oesophagusdnds="results/oesophagus/dnds_snv.csv",
+        oesophagusdndsgenes="results/oesophagus/dnds_genes_snv.csv",
+        oesophagusdndsneutral="results/oesophagus/dnds_neutral_snv.csv",
+        oesophagusmetadata="data/oesophagus/donorinfo_snv.csv",
+        skindnds="results/skin/dnds_snv.csv",
+        skindndsgenes="results/skin/dnds_genes_snv.csv",
+        skinmetadata="data/skin/donorinfo_snv.csv",
+    output:
+        oesophagusfitall = "results/dataforfigures/oesophagusfitall_snv.csv",
+        oesophagusfitmissense = "results/dataforfigures/oesophagusfitmissense_snv.csv",
+        oesophagusfitnonsense = "results/dataforfigures/oesophagusfitnonsense_snv.csv",
+        skinfitmissense = "results/dataforfigures/skinfitmissense_snv.csv",
+        skinfitnonsense = "results/dataforfigures/skinfitnonsense_snv.csv",
+        oesophagusfitmissensepergene = "results/dataforfigures/oesophagusfitmissensepergene_snv.csv",
+        oesophagusfitnonsensepergene = "results/dataforfigures/oesophagusfitnonsensepergene_snv.csv",
+        skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene_snv.csv",
+        skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene_snv.csv",
+        oesophagusfitneutral = "results/dataforfigures/oesophagusneutral_snv.csv"
+    shell:
+        """
+        module unload R
+        module load R/3.5.3
+        module load julia
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
+        julia julia/FitdNdS.jl \
+            --oesophagusdndsdata {input.oesophagusdnds} \
+            --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
+            --oesophagusdndsneutral {input.oesophagusdndsneutral} \
+            --oesophagusmetadata {input.oesophagusmetadata} \
+            --skindndsdata {input.skindnds} \
+            --skindndsdatagenes {input.skindndsgenes} \
+            --skinmetadata {input.skinmetadata} \
+            --oesophagusfitmissense {output.oesophagusfitmissense} \
+            --oesophagusfitall {output.oesophagusfitall} \
+            --oesophagusfitnonsense {output.oesophagusfitnonsense} \
+            --skinfitmissense {output.skinfitmissense} \
+            --skinfitnonsense {output.skinfitnonsense} \
+            --oesophagusfitmissensepergene {output.oesophagusfitmissensepergene} \
+            --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
+            --skinfitmissensepergene {output.skinfitmissensepergene} \
+            --skinfitnonsensepergene {output.skinfitnonsensepergene} \
+            --oesophagusfitneutral {output.oesophagusfitneutral}
+        """
+
 rule formatresultsSSB:
     input:
         all = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),

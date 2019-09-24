@@ -17,12 +17,56 @@ rule CalculatedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
+        singularityimage=config["stansingularity"]
     shell:
         """
         module load R
         module load gcc
         module load julia
         Rscript R/CalculatedNdS-normal.R \
+            --patientinfo {input.oesophaguspatientinfo} \
+            --oesophagusdata {input.oesophagusdata} \
+            --skindata {input.skindata} \
+            --oesophagusdnds {output.oesophagusdnds} \
+            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
+            --skindnds {output.skindnds} \
+            --skindndsgenes {output.skindndsgenes} \
+            --oesophagusdndsneutral {output.oesophagusdndsneutral} \
+            --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
+            --singlepatient {params.singlepatient} \
+            --singlepatientdnds {output.singlepatientdnds} \
+            --singlepatientdndsgenes {output.singlepatientdndsgenes} \
+            --step {params.step} \
+            --minarea {params.minarea} \
+            --maxarea {params.maxarea}
+        """
+
+rule CalculatedNdSNormalSNV:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+        skindata="data/skin/skin_mutation.csv"
+    output:
+        oesophagusdnds="results/oesophagus/dnds_snv.csv",
+        oesophagusdndsgenes="results/oesophagus/dnds_genes_snv.csv",
+        skindnds="results/skin/dnds_snv.csv",
+        skindndsgenes="results/skin/dnds_genes_snv.csv",
+        oesophagusdndsneutral="results/oesophagus/dnds_neutral_snv.csv",
+        oesophagusdndsgenesneutral="results/oesophagus/dnds_genes_neutral_snv.csv",
+        singlepatientdnds="results/dataforfigures/singlepatient_bins_snv.csv",
+        singlepatientdndsgenes="results/dataforfigures/singlepatient_bins_genes_snv.csv"
+    params:
+        singlepatient=config["patient"],
+        step=config["idndslimits"]["step"],
+        minarea=config["idndslimits"]["minarea"],
+        maxarea=config["idndslimits"]["maxarea"]
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module load R
+        module load gcc
+        module load julia
+        Rscript R/CalculatedNdS-normal-snv.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
             --skindata {input.skindata} \
@@ -78,6 +122,7 @@ rule CalculateSitedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
+        singularityimage=config["stansingularity"]
     shell:
         """
         module load R/3.5.3

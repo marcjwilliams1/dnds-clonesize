@@ -63,19 +63,19 @@ gwaic <- waicdf %>%
   theme_cowplot() +
   coord_flip()
 
-(ppcheckfrech <- plot(pp_check(modelfits$frechet, nsamples = 50)) + 
+(ppcheckfrech <- plot(pp_check(modelfits$frechet, nsamples = 50)) +
     scale_x_log10(limits = c(1e-3, 1e1)) +
      theme_cowplot() +
     xlab("Area") +
     ylab("Density"))
 
-(ppchecknormal <- plot(pp_check(modelfits$normal, nsamples = 50)) + 
+(ppchecknormal <- plot(pp_check(modelfits$normal, nsamples = 50)) +
     scale_x_log10(limits = c(1e-3, 1e1)) +
     theme_cowplot() +
     xlab("Area") +
     ylab("Density"))
 
-(ppchecklognormal <- plot(pp_check(modelfits$lognormal, nsamples = 50)) + 
+(ppchecklognormal <- plot(pp_check(modelfits$lognormal, nsamples = 50)) +
     scale_x_log10(limits = c(1e-3, 1e1)) +
     theme_cowplot() +
     xlab("Area") +
@@ -96,7 +96,7 @@ frechetCoef <- modelfits$lognormal %>%
   arrange(desc(coef))
 
 (gsummary <- frechetCoef %>%
-  ggplot(aes(x = fct_reorder(gene, coef, .desc = TRUE), y = coef, 
+  ggplot(aes(x = fct_reorder(gene, coef, .desc = TRUE), y = coef,
              xmin = .lower, xmax = .upper)) +
   geom_pointinterval() +
   xlab("") +
@@ -125,11 +125,12 @@ DFresults <- dfg %>%
   theme_cowplot())
 
 message("Generate final figure")
-g <- plot_grid(gwaic, ppcheck + theme(legend.position = c(0.7, 0.9)), 
+g <- plot_grid(gwaic, ppcheck + theme(legend.position = c(0.7, 0.9)),
                gcompare, ncol = 3, labels = c("a", "b", "c"), align = "h")
 (gall <- plot_grid(g, gsummary, ncol = 1, labels = c("", "d")))
 save_plot(args$suppfigures[1], gall, base_height = 10, base_width = 20)
 
-
-
-
+message("Linear regression")
+dat <- left_join(DFresults, frechetCoef)
+print(summary(lm(deltafit ~ coef, dat)))
+cor(dat$deltafit, dat$coef)
