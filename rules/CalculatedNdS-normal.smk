@@ -16,13 +16,13 @@ rule CalculatedNdSNormal:
         singlepatient=config["patient"],
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
-        maxarea=config["idndslimits"]["maxarea"]
+        maxarea=config["idndslimits"]["maxarea"],
         singularityimage=config["stansingularity"]
     shell:
         """
-        module load R
-        module load gcc
-        module load julia
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
         Rscript R/CalculatedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -59,13 +59,13 @@ rule CalculatedNdSNormalSNV:
         singlepatient=config["patient"],
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
-        maxarea=config["idndslimits"]["maxarea"]
+        maxarea=config["idndslimits"]["maxarea"],
         singularityimage=config["stansingularity"]
     shell:
         """
-        module load R
-        module load gcc
-        module load julia
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
         Rscript R/CalculatedNdS-normal-snv.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -121,12 +121,13 @@ rule CalculateSitedNdSNormal:
     params:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
-        maxarea=config["idndslimits"]["maxarea"]
+        maxarea=config["idndslimits"]["maxarea"],
         singularityimage=config["stansingularity"]
     shell:
         """
-        module load R/3.5.3
-        module load gcc
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
         Rscript R/CalculatesitedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \

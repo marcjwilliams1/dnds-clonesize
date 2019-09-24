@@ -25,18 +25,16 @@ parser$add_argument('--maxarea', type = 'double',
                     help="Min area for interval dN/dS")
 args <- parser$parse_args()
 
-args$step <- 3 * args$step
-args$minarea <- 3 * args$minarea
+args$step <- 1 * args$step
+args$minarea <- 1 * args$minarea
 
 message("Read in meta data for the oesophagus")
 dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
-  dplyr::rename(patient = PD) %>%
-  filter(!patient %in% c("PD30987", "PD30986", "PD30988", "PD30273", "PD30274"))
+  dplyr::rename(patient = PD)
 
 message("Read in mutation data for the oesophagus")
 df <- read_csv(args$oesophagusdata) %>%
-  mutate(sumvaf = sumvaf * 2)  %>%
-  filter(!donor %in% c("PD30987", "PD30986", "PD30988", "PD30273", "PD30274"))
+  mutate(sumvaf = sumvaf * 2)
 
 message("Create vector of intervals for i-dN/dS")
 minarea <- args$minarea
@@ -90,4 +88,4 @@ for (p in rev(unique(df$donor))){
 message("Write output to file")
 write_csv(dfdnds.patient, args$oesophagusdnds)
 write_csv(dfdnds.genes.patient, args$oesophagusdndsgenes)
-write_csv(dfhotspots, args$hotspots)
+write_csv(df.hotspots, args$hotspots)

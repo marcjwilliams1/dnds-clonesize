@@ -49,10 +49,10 @@ rule fitdNdSnormalSNV:
         oesophagusdnds="results/oesophagus/dnds_snv.csv",
         oesophagusdndsgenes="results/oesophagus/dnds_genes_snv.csv",
         oesophagusdndsneutral="results/oesophagus/dnds_neutral_snv.csv",
-        oesophagusmetadata="data/oesophagus/donorinfo_snv.csv",
+        oesophagusmetadata="data/oesophagus/donorinfo.csv",
         skindnds="results/skin/dnds_snv.csv",
         skindndsgenes="results/skin/dnds_genes_snv.csv",
-        skinmetadata="data/skin/donorinfo_snv.csv",
+        skinmetadata="data/skin/donorinfo.csv",
     output:
         oesophagusfitall = "results/dataforfigures/oesophagusfitall_snv.csv",
         oesophagusfitmissense = "results/dataforfigures/oesophagusfitmissense_snv.csv",
