@@ -26,7 +26,7 @@ parser$add_argument('--maxarea', type = 'double',
 args <- parser$parse_args()
 
 args$step <- 1 * args$step
-args$minarea <- 1 * args$minarea
+args$minarea <- 3 * args$minarea
 
 message("Read in meta data for the oesophagus")
 dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
@@ -58,10 +58,12 @@ for (p in rev(unique(df$donor))){
     x1 <- df %>%
       filter(donor == p) %>%
       filter(sumvaf < cutoff) #filter for mutations with sumvaf < cutoff
+    print(head(x1))
     x <- dndscv(x1, gene_list = target_genes,
                 outp = 3, max_muts_per_gene_per_sample = Inf,
                 max_coding_muts_per_sample = Inf,
-                outmats = T)
+                outmats = T,
+                uniquemuts = F)
     out <- x$globaldnds %>%
         mutate(areacutoff = cutoff, nmutations = length(x1$donor), patient = p)
     dfdnds.patient <- rbind(dfdnds.patient, out)
@@ -78,6 +80,7 @@ for (p in rev(unique(df$donor))){
         hotspots <- hotspots_res$recursites %>%
           mutate(areacutoff = cutoff, patient = p,
                  nmuts = length(hotspots_res$recursites$chr))
+        hotspots$chr <- as.character(hotspots$chr)
         df.hotspots <- bind_rows(df.hotspots, hotspots)
     }
   }

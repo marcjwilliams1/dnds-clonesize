@@ -17,7 +17,7 @@ CalculateSitedNdSNormal:
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
 
-CalculateSitedNdSNormalSNV:
+CalculatedNdSNormalSNV:
     time: "5:00:00"
     mem: 10G
     output: "{config[log_dir]}/{rule}.out"

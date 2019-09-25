@@ -180,11 +180,11 @@ message("Fit model pergene and per age")
 
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
-  group_by(gene, Age2) %>%
-  mutate(nmuts = n(),
-          maxvaf = quantile(sumvaf, args$quantile)) %>%
-  ungroup() %>%
-  filter(nmuts > 9) %>%
+  filter(str_detect(gene, "NOTCH1|TP53")) %>%
+  #group_by(gene, Age2) %>%
+  #mutate(nmuts = n(),          maxvaf = quantile(sumvaf, args$quantile)) %>%
+  #ungroup() %>%
+  #filter(nmuts > 9) %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(gene, Age2, nidx, maxvaf) %>%

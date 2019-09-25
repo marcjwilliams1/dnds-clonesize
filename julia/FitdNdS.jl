@@ -1,6 +1,6 @@
 println("Hello")
 using Pkg
-Pkg.build("RCall")
+#Pkg.build("RCall")
 using CSV
 using DataFrames
 using ArgParse
@@ -377,6 +377,10 @@ myDFnon = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64,
 for gene in unique(DF[:gene_name])
     println(gene)
     DFgene = filter(row -> row[:gene_name] == gene, DF);
+    if gene == "DICER1"
+        continue
+        println("Skipping DICER1")
+    end
 
     for p in DFdonor[:patient]
         println(p)

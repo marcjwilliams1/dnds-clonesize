@@ -124,21 +124,46 @@ fitmodel3 <- add_criterion(fitmodel3, c("loo", "waic", "R2"))
 print(fitmodel3)
 print(bayes_R2(fitmodel3))
 
+message("Fit model 4: exponential + power law exponent")
+prior4 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
+  prior(normal(0, 5), nlpar = "B") +
+  prior(normal(1, 1), nlpar = "C", lb = 0.1, ub = 3)
+nchains <- args$threads
+fitmodel4 <- brm(bf(C ~ (A / (n ^ C)) * exp(-n / exp(B)),
+               A ~ 1 + (1|Age),
+               B ~ 1 + (1|Age),
+               C ~ 1,
+               nl = TRUE),
+            data = mydat,
+            prior = prior4,
+            family = gaussian,
+            control = list(adapt_delta = 0.99),
+            chains = nchains,
+            cores = nchains,
+            iter = args$its)
+
+fitmodel4 <- add_criterion(fitmodel4, c("loo", "waic", "R2"))
+print(fitmodel4)
+print(bayes_R2(fitmodel4))
+
 message("")
 message("###########################################################")
 message("Compare models")
 
 modellist <- list(fullmodel = fitmodel1,
             exponential = fitmodel2,
-            powerlaw = fitmodel3)
+            powerlaw = fitmodel3,
+            fullmodelplus = fitmodel4)
 
 loo_compare_loo <- loo_compare(modellist$powerlaw,
                                modellist$fullmodel,
                                modellist$exponential,
+                               modellist$fullmodelplus,
                                criterion = "loo")
 loo_compare_waic <- loo_compare(modellist$powerlaw,
                                modellist$fullmodel,
                                modellist$exponential,
+                               modellist$fullmodelplus,
                                criterion = "waic")
 print(loo_compare_loo)
 print(loo_compare_waic)
