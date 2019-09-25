@@ -42,7 +42,8 @@ rule brmssites:
 
 rule clonesizesims:
     input:
-        data="results/simulations/clonesize_overtime.csv"
+        data="results/simulations/clonesize_overtime.csv",
+        datahitchike="results/simulations/clonesize_hitchikers.csv"
     output:
         "results/dataforfigures/simulation-clonesizefit.Rdata"
     threads: 4
@@ -55,6 +56,7 @@ rule clonesizesims:
         singularity exec {params.singularityimage} \
             Rscript R/fitclonesize-sims.R \
             --simulationdata {input.data} \
+            --simulationdatahitchike {input.datahitchike} \
             --output {output} \
             --threads {threads}
         """
