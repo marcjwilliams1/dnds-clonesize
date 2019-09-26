@@ -26,6 +26,7 @@ args <- list(simulationdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clones
              oesophaagusdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/esophagus.csv",
              oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
              rho = 5000,
+             datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
              binsize = 0.005)
 
 dfsims <- read_csv(args$simulationdata)
@@ -148,3 +149,5 @@ dfsims %>%
   scale_x_log10() +
   scale_y_log10()
 
+fits <- readRDS(args$datafits)
+readRDS("~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/")

@@ -140,7 +140,6 @@ mydat <- df %>%
   mutate(nmuts = n(),
         maxvaf = quantile(sumvaf, args$quantile)) %>%
   ungroup() %>%
-  filter(nmuts > 9) %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(gene, nidx, maxvaf) %>%
@@ -150,7 +149,11 @@ mydat <- df %>%
   complete(gene, nesting(n), fill = list(C = 0)) %>%
   #filter(C > 0) %>%
   filter(!is.na(n)) %>%
-  filter(n < maxvaf)
+  filter(n < maxvaf) %>%
+  group_by(gene) %>%
+  mutate(nmuts = sum(C)) %>%
+  ungroup() %>%
+  filter(nmuts > 19)
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
@@ -164,7 +167,7 @@ fitgene <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             data = mydat,
             prior = prior1,
             family = gaussian,
-            control = list(adapt_delta = 0.9),
+            control = list(adapt_delta = 0.99),
             chains = nchains,
             cores = nchains,
             iter = args$its)
@@ -181,10 +184,10 @@ message("Fit model pergene and per age")
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
   filter(str_detect(gene, "NOTCH1|TP53")) %>%
-  #group_by(gene, Age2) %>%
-  #mutate(nmuts = n(),          maxvaf = quantile(sumvaf, args$quantile)) %>%
-  #ungroup() %>%
-  #filter(nmuts > 9) %>%
+  group_by(gene, Age2) %>%
+  mutate(nmuts = n(),
+        maxvaf = quantile(sumvaf, args$quantile)) %>%
+  ungroup() %>%
   mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(gene, Age2, nidx, maxvaf) %>%
@@ -194,7 +197,11 @@ mydat <- df %>%
   complete(gene, Age2, nesting(n), fill = list(C = 0)) %>%
   #filter(C > 0) %>%
   filter(!is.na(n)) %>%
-  filter(n < maxvaf)
+  filter(n < maxvaf) %>%
+  group_by(Age2, gene) %>%
+  mutate(nmuts = sum(C)) %>%
+  ungroup() %>%
+  filter(nmuts > 19)
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.00001) +
   prior(normal(0, 5), nlpar = "B")
@@ -211,7 +218,7 @@ fitgeneage <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.99),
             chains = nchains,
             cores = nchains,
-            iter = args$its)
+            iter = 2 * args$its)
 
 fitgeneage <- add_criterion(fitgeneage, c("loo", "waic", "R2"))
 print(fitgeneage)
@@ -219,52 +226,8 @@ print(bayes_R2(fitgeneage))
 
 message("")
 message("###########################################################")
-message("Fit model pergene and per age for synonymous variants")
-
-mydat <- df %>%
-  filter(impact == "Synonymous") %>%
-  filter(str_detect(gene, "NOTCH1|TP53")) %>%
-  #group_by(gene, Age2) %>%
-  #mutate(nmuts = n(),          maxvaf = quantile(sumvaf, args$quantile)) %>%
-  #ungroup() %>%
-  #filter(nmuts > 9) %>%
-  mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
-  filter(!is.na(nidx)) %>%
-  group_by(gene, Age2, nidx, maxvaf) %>%
-  summarise(C = n()) %>%
-  ungroup() %>%
-  rename(n = nidx) %>%
-  complete(gene, Age2, nesting(n), fill = list(C = 0)) %>%
-  #filter(C > 0) %>%
-  filter(!is.na(n)) %>%
-  filter(n < maxvaf)
-
-prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.00001) +
-  prior(normal(0, 5), nlpar = "B")
-nchains <- args$threads
-
-message("Fit model...")
-fitgeneagesyn <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
-               A ~ 1 + (Age2|gene),
-               B ~ 1 + (Age2|gene),
-               nl = TRUE),
-            data = mydat,
-            prior = prior1,
-            family = gaussian,
-            control = list(adapt_delta = 0.99),
-            chains = nchains,
-            cores = nchains,
-            iter = args$its)
-
-fitgeneagesyn <- add_criterion(fitgeneage, c("loo", "waic", "R2"))
-print(fitgeneagesyn)
-print(bayes_R2(fitgeneagesyn))
-
-message("")
-message("###########################################################")
 message("Saving file")
 out<- list(gene = fitgene, age = fitage,
            geneage = fitgeneage,
-           geneagesyn = fitgeneagesyn,
             agesynon = fitagesynon)
 saveRDS(out, args$output)

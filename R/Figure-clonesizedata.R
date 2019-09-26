@@ -26,11 +26,12 @@ parser$add_argument('--binsize', type='double',
                     help="Binsize for fitting", default = 0.002)
 args <- parser$parse_args()
 
-#args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
-#             datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
-#             oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
-#             rho = 5000,
-#             binsize = 0.002)
+# args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
+#              datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
+#              oesophaagusdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/esophagus.csv",
+#              oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
+#              rho = 5000,
+#              binsize = 0.002)
 
 message("Read in data")
 
@@ -49,7 +50,7 @@ message("Summary of data")
 dftemp <- df %>%
   #filter(gene == "NOTCH1") %>%
   mutate(sumvaf = 2*sumvaf) %>%
-  mutate(colgene = gene, 
+  mutate(colgene = gene,
          colgene = ifelse(str_detect(colgene, "NOTCH[0-1+]|TP53") & impact != "Synonymous", colgene, "Other genes"),
          colgene = case_when(
            str_detect(gene, "NOTCH[0-1+]") & impact != "Synonymous" ~ "NOTCH1",
@@ -194,20 +195,20 @@ print(summary(lm(x ~ Age2, testdf %>% filter(type == "Non-synonymous"))))
 print(summary(lm(log(x) ~ log(Age2), testdf %>% filter(type == "Non-synonymous"))))
 
 
-g1 <- dfA %>% 
+g1 <- dfA %>%
   ggplot(aes(x = Age, y = condmean, col = type, group = type)) +
   stat_pointinterval(aes(y = condmean), alpha = 0.7,
                      .width = c(.66, .95), position = position_dodge(width = 0.5)) +
   theme_cowplot() +
   #ylab(expression(rho~mu~" (Cells/mm2 X mutations per division)")) +
-  ylab(expression(rho~mu~" ")) +
+  ylab(~n[0]~mu/~rho) +
   theme_cowplot() +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_colour_manual(values = c("brown4", "darkslategray")) +
   theme(legend.position = "none")
 
-g2 <- dfB %>% 
+g2 <- dfB %>%
   ggplot(aes(x = Age, y = condmean, col = type, group = type)) +
   stat_pointinterval(aes(y = condmean), alpha = 0.7,
                       .width = c(.66, .95), position = position_dodge(width = 0.5)) +
@@ -218,7 +219,7 @@ g2 <- dfB %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_smooth(method = "lm") +
   scale_colour_manual(values = c("brown4", "darkslategray")) +
-  theme(legend.position = c(0.1, 0.9), 
+  theme(legend.position = c(0.1, 0.9),
         legend.title = element_blank())
 
 mydatage <- fits$age$data %>%
@@ -236,11 +237,11 @@ gfitsage <- fits$age$data %>%
     facet_wrap(~ Age, ncol = 3) +#, scales = "free_x") +
     theme_cowplot() + scale_y_log10() + scale_x_log10() +
     xlab("Area") +
-    ylab("Counts") + 
+    ylab("Counts") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-gleft <-plot_grid(plot_grid(gdotplot, labels = c("a")), 
+gleft <-plot_grid(plot_grid(gdotplot, labels = c("a")),
                   plot_grid(gwaic, g1 + xlab(""), g2 + xlab("") + scale_y_log10(),
                             labels = c("b", "c", "d"), ncol = 3, rel_widths = c(0.7, 1, 1)), ncol = 1, align = "h")
 gall <- plot_grid(gleft, gfitsage, labels = c("", "e"), rel_widths = c(1.0, 0.7))
@@ -257,7 +258,7 @@ genecoefs <- fits$gene %>%
   median_qi(x = exp(r_gene__B + b_B_Intercept)) %>%
   arrange(desc(x)) %>%
   separate(condition, c("gene", "age"), "-") %>%
-  mutate(age = as.numeric(age)) 
+  mutate(age = as.numeric(age))
 
 (genes <- genecoefs %>%
   rename(Age2 = age) %>%
@@ -266,7 +267,7 @@ genecoefs <- fits$gene %>%
   geom_point() +
   geom_linerange() +
   facet_wrap(~gene, scales = "free_y") + scale_y_log10() +
-  xlab("Age") + 
+  xlab("Age") +
   theme_cowplot() +
   ylab(expression("N(t)/"~rho)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)))
@@ -280,7 +281,7 @@ for (mygene in c("NOTCH1", "TP53")){
     mutate(age = as.numeric(age)) %>%
     ungroup() %>%
     filter(gene1 == mygene )
-  
+
   gfits <- fits$gene$data %>%
       separate(gene, c("gene1", "age"), "-", remove = F) %>%
       mutate(age = as.numeric(age)) %>%
@@ -297,7 +298,7 @@ for (mygene in c("NOTCH1", "TP53")){
       facet_wrap(~ age, ncol = 9) +
       theme_cowplot() + scale_y_log10() + scale_x_log10() +
       xlab("Area") +
-      ylab("Counts") + 
+      ylab("Counts") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle(mygene)
   plotlist[[i]] <- gfits

@@ -73,14 +73,14 @@ rule Figure3:
          """
 
 
-rule FigureS6:
+rule Figure4:
     input:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
         skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
         skinfitmissense = "results/dataforfigures/skinfitmissense.csv",
         skinfitnonsense = "results/dataforfigures/skinfitnonsense.csv",
     output:
-        figure="Figures/FigureS6.pdf",
+        figure="Figures/Figure4.pdf",
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [10])
     params:
         mutationcutoff=config["mutationcutoff"],
@@ -138,7 +138,7 @@ rule Figurebinsize:
             --binsizesims {input.binsizesims}
         """
 
-rule Figure4:
+rule Figure5:
     input:
         oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
         oesophagusdata="data/oesophagus/esophagus.csv",
@@ -146,7 +146,7 @@ rule Figure4:
         modelfits="results/dataforfigures/data-clonesizefit-models.Rdata"
     output:
         suppfigures=expand("Figures/FigureS{S}.pdf", S = [16]),
-        figure="Figures/Figure4.pdf"
+        figure="Figures/Figure5.pdf"
     params:
         singularityimage=config["stansingularity"]
     shell:
@@ -191,7 +191,7 @@ rule FigureCloneSizeSims:
         data="results/simulations/clonesize_overtime.csv",
         fits="results/dataforfigures/simulation-clonesizefit.Rdata",
     output:
-        suppfigures=expand("Figures/FigureS{S}.pdf", S = [15]),
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [15, 25]),
     params:
         singularityimage=config["stansingularity"]
     shell:

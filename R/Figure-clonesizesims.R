@@ -20,6 +20,7 @@ parser$add_argument('--binsize', type='double',
                     help="Binsize for fitting", default = 0.002)
 args <- parser$parse_args()
 
+
 #args <- list(simulationdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/simulations/clonesize_overtime.csv",
 #             simulationfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/simulation-clonesizefit.Rdata",
 #             rho = 5000,
@@ -30,7 +31,8 @@ sims <- read_csv(args$simulationdata, guess_max = 10^5) %>%
   mutate(condition = factor(group_indices(., gene))) %>%
   mutate(A = f / args$rho)
 
-fit <- readRDS(args$simulationfits)
+fits <- readRDS(args$simulationfits)
+fit <- fits$fit
 
 message("Transform data")
 Nt0 <- function(rlam = 0.5, delta = 0.0, t = 10.0){
@@ -104,7 +106,7 @@ gA <- fit %>%
                       .width = c(.66, .95), position = position_nudge(y = 0.0)) +
   # data
   geom_point(aes(x = A / (Nsims * (args$binsize))), data = params, col = "firebrick", fill = "white", shape = 21, size = 2) +
-  xlab(expression("N"~mu)) +
+  xlab(~n[0]~mu/~rho) +
   coord_flip() +
   theme_cowplot() +
   ylab(expression("Input "~mu)) +
@@ -146,7 +148,7 @@ gfits <- mydat %>%
     facet_wrap(~ t, ncol = 7, scales = "free") +
     theme_cowplot() + scale_y_log10() +
     xlab("Area") +
-    ylab("Counts") + 
+    ylab("Counts") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 message("Save plot fits")
@@ -163,7 +165,7 @@ infval <- fit %>%
   median_qi()
 
 message(paste0("Population intercept coefficient: ", round(val, 3)))
-message(paste0("Inferred population intercept coefficient: ", round(infval$b_A_Intercept, 3), 
+message(paste0("Inferred population intercept coefficient: ", round(infval$b_A_Intercept, 3),
                " (", round(infval$.lower, 3) , ", ", round(infval$.upper, 3), ")"))
 
 
@@ -173,10 +175,83 @@ sims %>%
   summarise(x= n() / first(Nsims)) %>%
   ggplot(aes(x = t, y = x)) + geom_point() +
   scale_y_log10()#+geom_smooth(method = "lm")
-  
+
 f2 <- sims %>%
   filter(delta == 0.0) %>%
   group_by(t, mu) %>%
   summarise(x= n() / first(Nsims))
-summary(lm(x~log(t), f2))  
-  
+summary(lm(x~log(t), f2))
+
+
+message("Hitchikers")
+
+dfparams <- data.frame(tstr = unique(fits$hitchikers$data$condition), Nsims = 10^4, mu = 0.01 / 3, N0 = 10^3, 
+                       rho = args$rho, rlam = 0.5) %>%
+  separate(tstr, c(NA, "t"), "_") %>%
+  mutate(t = as.numeric(t), tstr = paste0("t_", t)) %>%
+  mutate(A = N0 * mu * Nsims * (args$binsize),
+         B = (1 + rlam * t)/5000) %>%
+  mutate(yax = t)
+
+gA <- fits$hitchikers %>%
+  spread_draws(r_condition__A[condition, ], b_A_Intercept) %>%
+  mutate(condmean = r_condition__A + b_A_Intercept) %>%
+  #left_join(params) %>%
+  mutate(condmean = condmean / (Nsims * (args$binsize))) %>%
+  mutate(yax = as.numeric(str_split(condition, "_")[[1]][2])) %>%
+  ggplot(aes(y = yax)) +
+  scale_color_brewer() +
+  stat_pointintervalh(aes(x = condmean), alpha = 0.7,
+                      .width = c(.66, .95), position = position_nudge(y = 0.0)) +
+  # data
+  geom_point(aes(x = A), data = dfparams, col = "firebrick", fill = "white", shape = 21, size = 2) +
+  xlab(~n[0]~mu/~rho) +
+  coord_flip() +
+  theme_cowplot() +
+  ylab(expression("Input "~mu)) +
+  theme_cowplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+gB <- fits$hitchikers %>%
+  spread_draws(r_condition__B[condition, ], b_B_Intercept) %>%
+  mutate(condmean = r_condition__B + b_B_Intercept) %>%
+  #left_join(params) %>%
+  mutate(condmean = exp(condmean)) %>%
+  mutate(yax = as.numeric(str_split(condition, "_")[[1]][2])) %>%
+  ggplot(aes(y = yax)) +
+  stat_pointintervalh(aes(x = condmean), alpha = 0.7,
+                      .width = c(.66, .95), position = position_nudge(y = -0.0)) +
+  geom_point(aes(x = B), data = dfparams, col = "firebrick", fill = "white", shape = 21, size = 2) +
+  theme_cowplot() +
+  ggtitle("") +
+  theme(legend.position = "none") +
+  #scale_x_log10() +
+  xlab(expression("N(t)/"~rho)) +
+  coord_flip() +
+  ylab(expression("time (Years)")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+mydathitch <- fits$hitchikers$data %>%
+  group_by(condition) %>%
+  mutate(maxA = max(n))
+
+gfits <- fits$hitchikers$data %>%
+  #filter(delta == 0.1) %>%
+  data_grid(n = unique(fits$hitchikers$data$n), condition) %>%
+  add_predicted_draws(fits$hitchikers, n = 1000) %>%
+  left_join(., mydathitch) %>%
+  filter(n < maxA) %>%
+  ggplot(aes(x = n, y = C)) +
+  stat_lineribbon(aes(y = .prediction), .width = c(.95, .8, .5), color = "#08519C") +
+  geom_point(data = mydathitch) +
+  scale_fill_brewer() +
+  facet_wrap(~ condition, ncol = 3, scales = "free") +
+  theme_cowplot() + scale_y_log10() +
+  xlab("Area") +
+  ylab("Counts") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+save_plot(args$suppfigure[2], plot_grid(plot_grid(gA, gB, ncol = 1, labels = c("a", "b")), 
+                                        gfits, ncol = 2, labels = c("", "c")),
+          base_height = 7, base_width = 20)
+

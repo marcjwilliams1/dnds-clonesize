@@ -24,7 +24,7 @@ sims <- read_csv(args$simulationdata, guess_max = 10^5) %>%
   mutate(condition = factor(group_indices(., gene))) %>%
   mutate(A = f / args$rho)
 
-simshitchike <- read_csv(args$simulationdata, guess_max = 10^5) %>%
+simshitchike <- read_csv(args$simulationdatahitchike, guess_max = 10^5) %>%
   filter(muttype == "Syn", muNS == 0.01) %>%
   mutate(condition = paste0("t_", tend)) %>%
   mutate(A = f / args$rho)
@@ -42,26 +42,28 @@ midcut<-function(x,from,to,by){
 }
 
 
-
+message("Binning data")
 mydat <- sims %>%
   mutate(fidx = midcut(A, args$binsize, 1, args$binsize)) %>%
   filter(!is.na(fidx)) %>%
   group_by(condition) %>%
   mutate(maxA = max(A)) %>%
-  group_by(fidx, gene, delta, rlam, t, Nsims, mu, N0, condition, maxA) %>%
+  group_by(fidx, gene, delta, rlam, t, Nsims, mu, N0, maxA, condition) %>%
   summarise(C = n()) %>%
   ungroup() %>%
   rename(n = fidx) %>%
   complete(gene, nesting(n), fill = list(C = 0)) %>%
-  fill(delta, rlam, t, Nsims, mu,N0, condition, .direction = "down")
+  fill(delta, rlam, t, Nsims, mu,N0, condition, .direction = "down") %>%
   filter(n < maxA)
 
+message("Binning data (hitchikers)")
 mydathitchike <- simshitchike %>%
   mutate(fidx = midcut(A, args$binsize, 1, args$binsize)) %>%
   filter(!is.na(fidx)) %>%
   group_by(condition) %>%
   mutate(maxA = max(A)) %>%
-  group_by(fidx, N0, Nsims, muNS, muS, maxA, muttype, tend) %>%
+  ungroup() %>%
+  group_by(fidx, N0, Nsims, muNS, muS, maxA, muttype, tend, condition) %>%
   summarise(C = n()) %>%
   ungroup() %>%
   rename(n = fidx) %>%
@@ -69,9 +71,7 @@ mydathitchike <- simshitchike %>%
   fill(Nsims, muNS, muS, N0, tend, .direction = "down") %>%
   filter(n < maxA)
 
-params <- distinct(mydat, gene, condition, A, logB, B) %>%
-  mutate(condition = paste0("condition", condition))
-
+message("Setting up priors")
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
 nchains <- args$threads
@@ -90,11 +90,12 @@ fit1 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             cores = nchains,
             iter = its)
 
+message("Adding information criteria")
 fit1 <- add_criterion(fit1, c("loo", "waic", "R2"))
 print(fit1)
 print(bayes_R2(fit1))
 
-message("Fit model...")
+message("Fit model for hitchikers...")
 fit2 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
                A ~ 1 + (1|condition),
                B ~ 1 + (1|condition),
@@ -107,6 +108,7 @@ fit2 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             cores = nchains,
             iter = its)
 
+message("adding information criteria")
 fit2 <- add_criterion(fit2, c("loo", "waic", "R2"))
 print(fit2)
 print(bayes_R2(fit2))
