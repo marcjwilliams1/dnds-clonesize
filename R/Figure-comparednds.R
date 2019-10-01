@@ -59,21 +59,23 @@ summarydfgene <- dfgene %>%
 
 (g1 <- summarydf %>%
   ggplot(aes(x = deltafit.x, y = deltafit.y)) +
-  geom_point(aes(size = nmutations.x)) +
+  geom_point(aes(size = nmutations.y)) +
   facet_wrap(~mutation_class, scales = "free") +
   geom_abline(lty = 2, col = "firebrick") +
   ggtitle("Global dN/dS") +
+  scale_size(limits = c(1, 1000), name = "# Mutations") +
   xlab(expression(Delta*" (dndscv)")) +
   ylab(expression(Delta*" (SSB)")))
 
 (g2a <- summarydfgene %>%
   filter(mutation_class == "Nonsense") %>%
   ggplot(aes(x = deltafit.x, y = deltafit.y, col = gene)) +
-  geom_point() +
+  geom_point(aes(size = nmutations.y)) +
   #facet_wrap(~mutation_class, scales = "free") +
   geom_abline(lty = 2, col = "firebrick") +
   xlab(expression(Delta*" (dndscv)")) +
   ylab(expression(Delta*" (SSB - dN/dS)")) +
+  scale_size(limits = c(1, 1000), guide = "none") +
   xlim(c(0, 0.1)) +
   ylim(c(0, 0.1)) +
   theme(legend.title = element_blank()) +
@@ -85,11 +87,12 @@ summarydfgene <- dfgene %>%
 (g2b <- summarydfgene %>%
   filter(mutation_class == "Missense") %>%
   ggplot(aes(x = deltafit.x, y = deltafit.y, col = gene)) +
-  geom_point() +
+  geom_point(aes(size = nmutations.y)) +
   #facet_wrap(~mutation_class, scales = "free") +
   geom_abline(lty = 2, col = "firebrick") +
   xlab(expression(Delta*" (dndscv)")) +
   ylab(expression(Delta*" (SSB - dN/dS)")) +
+  scale_size(limits = c(1, 1000), guide = "none") +
   xlim(c(0, 0.075)) +
   ylim(c(0, 0.05)) +
   theme(legend.title = element_blank()) +

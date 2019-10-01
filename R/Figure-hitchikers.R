@@ -149,7 +149,7 @@ dfsims %>%
 # Plot data per patch
 message("Read in data from xlsx file")
 
-dfall <- readxl::read_xlsx(args$oesophaagusdata_all, sheet = 1, skip = 16)
+dfall <- readxl::read_xlsx(args$oesophagusdata_all, sheet = 1, skip = 16)
 
 dfallcounts <- dfall %>%
   mutate(muttype = case_when(
@@ -218,7 +218,6 @@ patch <- full_join(nmuts, vafmuts, by = "sampleID", suffix = c("_n", "_vaf"))
 gall <- plot_grid(g1, g2, g3, g4, ncol = 2, align = "hv", labels = c("a", "b", "c", "d"))
 
 message("Save figure")
-print(args)
 save_plot(args$suppfigures[1], gall, base_height = 8, base_width = 20)
 
 mylm <- lm(Synonymous_n ~ NOTCH1_n, patch)
