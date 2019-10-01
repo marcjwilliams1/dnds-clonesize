@@ -26,12 +26,12 @@ parser$add_argument('--binsize', type='double',
                     help="Binsize for fitting", default = 0.002)
 args <- parser$parse_args()
 
-# args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
-#              datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
-#              oesophaagusdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/esophagus.csv",
-#              oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
-#              rho = 5000,
-#              binsize = 0.002)
+ # args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
+ #              datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
+ #              oesophaagusdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/esophagus.csv",
+ #              oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
+ #              rho = 5000,
+ #              binsize = 0.002)
 
 message("Read in data")
 
@@ -189,21 +189,31 @@ message("Age vs parameter")
 print(summary(lm(x ~ Age2*type, testdf)))
 print(summary(lm(x ~ Age2:type, testdf)))
 message("Age vs parameter synonymous")
-print(summary(lm(x ~ Age2, testdf %>% filter(type == "Synonymous"))))
+mylm <- lm(x ~ Age2, testdf %>% filter(type == "Synonymous"))
+mylm2 <- lm(log(x) ~ log(Age2), testdf %>% filter(type == "Synonymous"))
+print(summary(mylm))
+print(summary(mylm2))
+print(paste0("AIC model 1: ", AIC(mylm)))
+print(paste0("AIC model 2: ", AIC(mylm2)))
 message("Age vs parameter non-synonymous")
-print(summary(lm(x ~ Age2, testdf %>% filter(type == "Non-synonymous"))))
-print(summary(lm(log(x) ~ log(Age2), testdf %>% filter(type == "Non-synonymous"))))
+mylm <- lm(x ~ Age2, testdf %>% filter(type == "Non-synonymous"))
+mylm2 <- lm(log(x) ~ log(Age2), testdf %>% filter(type == "Non-synonymous"))
+print(summary(mylm))
+print(summary(mylm2))
+print(paste0("AIC model 1: ", AIC(mylm)))
+print(paste0("AIC model 2: ", AIC(mylm2)))
 
 
 g1 <- dfA %>%
+  mutate(condmean = ifelse(type == "Synonymous", condmean * 3, condmean)) %>%
   ggplot(aes(x = Age, y = condmean, col = type, group = type)) +
   stat_pointinterval(aes(y = condmean), alpha = 0.7,
-                     .width = c(.66, .95), position = position_dodge(width = 0.5)) +
+                     .width = c(.66, .95), position = position_dodge(width = 0.75)) +
   theme_cowplot() +
   #ylab(expression(rho~mu~" (Cells/mm2 X mutations per division)")) +
   ylab(~n[0]~mu/~rho) +
   theme_cowplot() +
-  scale_y_log10() +
+  #scale_y_log10() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_colour_manual(values = c("brown4", "darkslategray")) +
   theme(legend.position = "none")
@@ -226,7 +236,7 @@ mydatage <- fits$age$data %>%
   left_join(., donor)
 
 gfitsage <- fits$age$data %>%
-    data_grid(n = unique(fits$gene$data$n), Age) %>%
+    data_grid(n = unique(fits$age$data$n), Age) %>%
     add_predicted_draws(fits$age, n = 1000) %>%
     left_join(., mydatage) %>%
     filter(C > 0) %>%
@@ -254,11 +264,12 @@ save_plot(filename = args$figure, gall, base_height = 8, base_width = 18)
 #########################################
 
 genecoefs <- fits$gene %>%
-  spread_draws(r_gene__B[condition, int], b_B_Intercept, sd_gene__B_Intercept) %>%
-  median_qi(x = exp(r_gene__B + b_B_Intercept)) %>%
+  spread_draws(r_gene__B[condition, ], b_B_Intercept, sd_gene__B_Intercept) %>%
+  median_qi(x = exp(r_gene__B)) %>%
   arrange(desc(x)) %>%
   separate(condition, c("gene", "age"), "-") %>%
-  mutate(age = as.numeric(age))
+  mutate(age = as.numeric(age)) %>%
+  arrange(gene, age)
 
 (genes <- genecoefs %>%
   rename(Age2 = age) %>%
@@ -266,7 +277,7 @@ genecoefs <- fits$gene %>%
   ggplot(aes(x = Age, y = x, ymin = .lower, ymax = .upper)) +
   geom_point() +
   geom_linerange() +
-  facet_wrap(~gene, scales = "free_y") + scale_y_log10() +
+  facet_wrap(~gene, scales = "free_y", ncol = 1) + scale_y_log10() +
   xlab("Age") +
   theme_cowplot() +
   ylab(expression("N(t)/"~rho)) +
@@ -306,9 +317,9 @@ for (mygene in c("NOTCH1", "TP53")){
 }
 
 gleft <- plot_grid(plotlist = plotlist, ncol = 1)
-gall <- plot_grid(gleft, genes, ncol = 2, labels = c("a", "b"))
+gall <- plot_grid(gleft, genes, ncol = 2, labels = c("a", "b"), rel_widths = c(1, 0.6))
 
-save_plot(args$suppfigure[1], gall, base_height = 10, base_width = 20)
+save_plot(args$suppfigure[1], gall, base_height = 10, base_width = 15)
 
 
 

@@ -72,7 +72,6 @@ rule Figure3:
             --rsqcutoff {params.rsqcutoff}
          """
 
-
 rule Figure4:
     input:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
@@ -204,4 +203,27 @@ rule FigureCloneSizeSims:
             --simulationdata {input.data} \
             --suppfigures {output.suppfigures}
 
+        """
+
+rule FigureHitchikers:
+    input:
+        oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",
+        oesophagusdata="data/oesophagus/esophagus.csv",
+        oesophagusdata_all="data/oesophagus/aau3879_TableS2.xlsx",
+        simulationdata="results/simulations/clonesize_hitchikers.csv"
+    output:
+        suppfigures=expand("Figures/FigureS{S}.pdf", S = [26]),
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+        Rscript R/Figure-hitchikers.R \
+            --simulationdata {input.simulationdata} \
+            --oesophagusdata {input.oesophagusdata} \
+            --oesophagusdata_all {input.oesophagusdata_all} \
+            --oesophagusmetadata {input.oesophaguspatientinfo} \
+            --suppfigures {output.suppfigures}
         """

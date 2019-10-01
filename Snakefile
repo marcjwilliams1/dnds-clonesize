@@ -12,8 +12,8 @@ report: "report/workflow.rst"
 shell.executable("/bin/bash")
 shell.prefix("source ~/.bash_profile; ")
 
-figs=[1,2,3,4]
-suppfigs=[1,2,3,4,5,6,10,12,13,14,15,16,17,18]
+figs=[1,2,3,4,5]
+suppfigs=[1,2,3,4,5,6,10,12,13,14,15,16,17,18,26]
 
 #list of oesophagus samples
 OES_SAMPLES=["PD36806","PD36712","PD30272","PD30986","PD30987","PD30274", "PD30988", "PD30273","PD31182"]

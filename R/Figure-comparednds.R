@@ -51,25 +51,26 @@ dfgene <- inner_join(dndscv, SSB %>% filter(gene != "All"), by = c("patient", "A
 
 summarydf <- dfglobal %>%
   distinct(deltafit.x, deltafit.y, patient, Age2, mutation_class,
-           rsq.x, rsq.y)
+           rsq.x, rsq.y, nmutations.x, nmutations.y)
 
 summarydfgene <- dfgene %>%
   distinct(deltafit.x, deltafit.y, patient, Age2, mutation_class,
-           rsq.x, rsq.y, gene)
+           rsq.x, rsq.y, gene, nmutations.x, nmutations.y)
 
 (g1 <- summarydf %>%
   ggplot(aes(x = deltafit.x, y = deltafit.y)) +
-  geom_point() +
+  geom_point(aes(size = nmutations.x)) +
   facet_wrap(~mutation_class, scales = "free") +
   geom_abline(lty = 2, col = "firebrick") +
   ggtitle("Global dN/dS") +
   xlab(expression(Delta*" (dndscv)")) +
   ylab(expression(Delta*" (SSB)")))
 
-(g2 <- summarydfgene %>%
+(g2a <- summarydfgene %>%
+  filter(mutation_class == "Nonsense") %>%
   ggplot(aes(x = deltafit.x, y = deltafit.y, col = gene)) +
   geom_point() +
-  facet_wrap(~mutation_class, scales = "free") +
+  #facet_wrap(~mutation_class, scales = "free") +
   geom_abline(lty = 2, col = "firebrick") +
   xlab(expression(Delta*" (dndscv)")) +
   ylab(expression(Delta*" (SSB - dN/dS)")) +
@@ -78,9 +79,26 @@ summarydfgene <- dfgene %>%
   theme(legend.title = element_blank()) +
   scale_color_manual(values = c("firebrick4", "deepskyblue")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = c(0.6, 0.8)) +
-  ggtitle("Gene level values")
+        legend.position = c(0.1, 0.8)) +
+  ggtitle("Nonsense")
   )
+(g2b <- summarydfgene %>%
+  filter(mutation_class == "Missense") %>%
+  ggplot(aes(x = deltafit.x, y = deltafit.y, col = gene)) +
+  geom_point() +
+  #facet_wrap(~mutation_class, scales = "free") +
+  geom_abline(lty = 2, col = "firebrick") +
+  xlab(expression(Delta*" (dndscv)")) +
+  ylab(expression(Delta*" (SSB - dN/dS)")) +
+  xlim(c(0, 0.075)) +
+  ylim(c(0, 0.05)) +
+  theme(legend.title = element_blank()) +
+  scale_color_manual(values = c("firebrick4", "deepskyblue")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.1, 0.8)) +
+  ggtitle("Missense")
+  )
+ g2 <- plot_grid(g2b, g2a)
 
 (g3 <- dfglobal %>%
   distinct(dnds.x, dnds.y, patient, mutation_class) %>%

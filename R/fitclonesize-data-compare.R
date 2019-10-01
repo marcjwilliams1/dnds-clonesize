@@ -53,6 +53,7 @@ message("Fit model for age")
 
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
+  filter(str_detect(impact, "Missense|Nonsense")) %>%
   group_by(Age) %>%
   mutate(maxvaf = quantile(sumvaf, args$quantile)) %>%
   ungroup() %>%

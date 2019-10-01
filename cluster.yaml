@@ -127,20 +127,20 @@ brmssites:
     error: "{config[log_dir]}/{rule}.out"
 
 clonesizedata:
-    time: "10:00:00"
-    mem: 8G
+    time: "3:00:00"
+    mem: 2G
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
 
 clonesizedatacompare:
-    time: "10:00:00"
-    mem: 8G
+    time: "3:00:00"
+    mem: 2G
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
 
 clonesizesims:
-    time: "10:00:00"
-    mem: 8G
+    time: "3:00:00"
+    mem: 2G
     output: "{config[log_dir]}/{rule}.out"
     error: "{config[log_dir]}/{rule}.out"
 
