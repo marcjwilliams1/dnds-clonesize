@@ -23,15 +23,7 @@ parser$add_argument('--oesophagusfitmissense', type='character',
                     help="Fits for missense mutations oesophagus")
 args <- parser$parse_args()
 
-
-
-#args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/brmsfit.Rdata",
-#             datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
-#             oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
-#             rho = 5000)
-
 modelfits <- readRDS(args$datafits)
-
 
 message("Perform some model selection")
 waicdf <- data.frame(waic = c(modelfits$frechet$waic$estimates[3],
@@ -127,8 +119,8 @@ DFresults <- dfg %>%
 message("Generate final figure")
 g <- plot_grid(gwaic, ppcheck + theme(legend.position = c(0.7, 0.9)),
                gcompare, ncol = 3, labels = c("a", "b", "c"), align = "h")
-(gall <- plot_grid(g, gsummary, ncol = 1, labels = c("", "d")))
-save_plot(args$suppfigures[1], gall, base_height = 10, base_width = 20)
+gall <- plot_grid(gsummary, gcompare, ncol = 2, labels = c("a", "b"), rel_widths = c(1.0, 0.3))
+save_plot(args$suppfigures[1], gall, base_height = 5, base_width = 20)
 
 message("Linear regression")
 dat <- left_join(DFresults, frechetCoef)
