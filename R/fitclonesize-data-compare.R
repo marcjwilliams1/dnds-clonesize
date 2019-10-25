@@ -169,6 +169,16 @@ loo_compare_waic <- loo_compare(modellist$powerlaw,
 print(loo_compare_loo)
 print(loo_compare_waic)
 
+mweights <- model_weights(modellist$powerlaw, modellist$fullmodel, modellist$exponential, modellist$fullmodelplus, weights = "waic")
+print(mweights)
+
+mweights <- model_weights(modellist$powerlaw, modellist$fullmodel, modellist$exponential, weights = "waic")
+print(mweights)
+
+library(bayestestR)
+comparison <- bayesfactor_models(modellist$powerlaw, modellist$fullmodel, modellist$exponential)
+print(comparison)
+
 message("")
 message("###########################################################")
 message("Saving file")
