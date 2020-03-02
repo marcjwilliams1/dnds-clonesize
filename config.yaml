@@ -21,6 +21,8 @@ metadata:
     skin:
         - data/skin/donorinfo.csv
 
+stansingularity: "/data/BCI-EvoCa2/marc/singularity/dnds-clonesize-R-container_latest.sif"
+
 #number of times to resample the simulations
 nsamplesnormal: 100
 

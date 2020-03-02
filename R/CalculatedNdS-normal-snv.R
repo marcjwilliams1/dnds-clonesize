@@ -45,7 +45,8 @@ dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
 
 message("Read in mutation data for the oesophagus")
 df <- read_csv(args$oesophagusdata) %>%
-  mutate(sumvaf = sumvaf * 2)
+  mutate(sumvaf = sumvaf * 2)  %>%
+  filter(nchar(ref) == 1 & nchar(mut) == 1, mut != "-")
 
 message("Create vector of intervals for i-dN/dS")
 minarea <- args$minarea
@@ -190,7 +191,8 @@ for (p in unique(df$patient)){
           filter(clone.area < cutoff) #filter for mutations with ccf < cutoff
         x <- dndscv(x1, gene_list = target_genes,
                     outp = 3, max_muts_per_gene_per_sample = Inf,
-                    max_coding_muts_per_sample = Inf)
+                    max_coding_muts_per_sample = Inf,
+                    uniquemuts = F)
         out <- x$globaldnds %>%
             mutate(areacutoff = cutoff, nmutations = length(x1$donor), patient = p)
         dfdnds.patient <- rbind(dfdnds.patient, out)

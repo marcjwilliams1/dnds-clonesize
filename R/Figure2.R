@@ -99,7 +99,7 @@ gsim <- dfsim %>%
     geom_ribbon(aes(ymin = dndsfitlq, ymax = dndsfituq, group = deltag, fill = deltag, col = deltag), alpha = 0.1) +
     geom_text(data = textdf, aes(label = label, y = y, col = deltag), x = 15.0, size = 3, parse = TRUE) +
     xlab("Clone Area") +
-    ylab("dN/dS") +
+    ylab("Interval dN/dS") +
     ggtitle("Simulated cohort") +
     theme(legend.position = "none") +
     scale_color_jcolors(palette = "pal6")

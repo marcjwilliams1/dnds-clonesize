@@ -1,6 +1,6 @@
 println("Hello")
 using Pkg
-Pkg.build("RCall")
+#Pkg.build("RCall")
 using CSV
 using DataFrames
 using ArgParse
@@ -32,6 +32,8 @@ s = ArgParseSettings()
         help = "Information on patient ages etc"
     "--oesophagusfitmissense"
         help = "Fits for oesophagus missense mutations"
+    "--oesophagusfitall"
+        help = "Fits for oesophagus all mutations"
     "--oesophagusfitnonsense"
         help = "Fits for oesophagus nonsense mutations"
     "--oesophagusfitmissensepergene"
@@ -116,13 +118,40 @@ for p in DFdonor[:patient]
     append!(myDFnon, x.DF)
 end
 
+
+myDFall = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64,
+    Float64, Float64, Float64, Float64, Float64, Float64,
+    Float64, Float64, String, String, Float64, Float64],
+[:dnds, :A, :dndsfit, :dndsfitlq, :dndsfituq, :deltafit, :lambdarfit,
+    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda,
+    :rsq, :patient, :Age, :Age2, :nmutations], 0)
+
+println("Analyse per patient data for all mutations...")
+for p in DFdonor[:patient]
+    println("Analysing patient $p")
+    DFpatient = filter(row -> row[:patient] == p, DFcohort);
+    DFpatient = filter(row -> row[:name] == "wall", DFpatient)
+    if DFpatient[:mle][1] == 0.0
+        continue
+    end
+    age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
+    x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+    x.DF[:patient] = p
+    x.DF[:Age] = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
+    x.DF[:Age2] = age
+    x.DF[:nmutations] = DFpatient[:nmutations]
+    append!(myDFall, x.DF)
+end
+
 println("Writing data to file....")
 @rput myDFmiss
 @rput myDFnon
+@rput myDFall
 R"""
 library(readr)
 write_csv(myDFmiss, $(parsed_args["oesophagusfitmissense"]))
 write_csv(myDFnon, $(parsed_args["oesophagusfitnonsense"]))
+write_csv(myDFall, $(parsed_args["oesophagusfitall"]))
 """;
 
 println("Reading in per gene data...")
@@ -348,6 +377,10 @@ myDFnon = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64,
 for gene in unique(DF[:gene_name])
     println(gene)
     DFgene = filter(row -> row[:gene_name] == gene, DF);
+    if gene == "DICER1"
+        continue
+        println("Skipping DICER1")
+    end
 
     for p in DFdonor[:patient]
         println(p)

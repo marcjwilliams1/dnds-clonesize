@@ -3,7 +3,6 @@ library(cowplot)
 library(tidyverse)
 theme_set(theme_cowplot())
 library(jcolors)
-library(forcats)
 library(ggforce)
 library(Hmisc)
 
@@ -253,7 +252,7 @@ nonsenseperpatient <- dfnon %>%
     coord_flip() +
     ylim(c(0, 15.0)) +
     xlab("") +
-    ylab(expression(lambda)) +
+    ylab(expression(r~lambda)) +
     ggtitle("Nonsense")
 
 missenseperpatient <- dfmiss %>%
@@ -268,7 +267,7 @@ missenseperpatient <- dfmiss %>%
     coord_flip() +
     ylim(c(0, 34.0)) +
     xlab("") +
-    ylab(expression(lambda)) +
+    ylab(expression(r~lambda)) +
     ggtitle("Missense")
 
 patientplot2 <- plot_grid(missenseperpatient, nonsenseperpatient, align = T, labels = c("c", "d"))
@@ -334,7 +333,7 @@ glambda <- dfcombined %>%
                        position = position_dodge2(width = 0.5)) +
     coord_flip() +
     xlab("") +
-    ylab(expression(lambda)) +
+    ylab(expression(r~lambda)) +
     facet_wrap(~plab, drop = TRUE, scales = "free") +
     scale_fill_jcolors(palette = "default") +
     theme(legend.position = "none") +

@@ -26,8 +26,6 @@ s = ArgParseSettings()
         help = "File to save example fits"
     "--exampledifferentbins"
         help = "File to save example fits"
-    "--powerout"
-        help = "File to save power analysis"
     "--nsamples"
         help = "Number of samples to take"
         arg_type = Int
@@ -99,65 +97,72 @@ function simulatepopulation(;Δ = 0.0, ρ = 100.0, Amin = 1 ./ ρ, gap = 0.02, t
     return DFinterval, SMtog, [DFinterval[:dn][end] * Nits, DFinterval[:ds][end] * Nits]
 end
 
-println("Generating some example data with fits")
+#####################################################
+# Power to recover paramters
+#####################################################
+println("Running simulation to test power to recover paramters")
 
-#create empty dataframe to store data
+
+#create some empty vectors and dataframes to store data
+deltavec = Float64[]
+rlambdavec = Float64[]
+nmutsdn = Float64[]
+nmutsds = Float64[]
+itvec = Int64[]
+sampvec = Float64[]
+rsq = Float64[]
+myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Int64, Int64],
+[:dnds, :A, :dndsfit, :deltafit, :lambdarfit, :rsq, :deltatrue, :lambdartrue, :its, :nsamples], 0)
+
 myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64,
-    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64],
+    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Int64, Int64],
 [:dnds, :A, :dndsfit, :dndsfitlq, :dndsfituq, :deltafit, :lambdarfit,
-    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue], 0)
+    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue,
+    :its, :nsamples], 0)
 
-for Δ in [0.0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]
-    println(Δ)
-    for rlam in [0.25, 0.5]
-        println(rlam)
-        rlambda = rlam
-        DF1, SM = simulatepopulation(;Δ = Δ, tend = 30.0, Amin = 0.05, ρ = 100.0, λ = rlambda, Amax = 25.0)
+#number od mutations to be samples
+for nsamples in [5, 8, 10, 25, 50, 100, 250]
+    #repeat 100 times
+    for i in 1:parsed_args["nsamples"]
+        Random.seed!(i)
+        Δ = 0.25
+        r = 0.5
+        lambda = 1.0
+        rlambda = r * lambda
+        DF1, SM, nmuts = simulatepopulation(;Δ = Δ, tend = 30.0, Amin = 0.05, ρ = 100.0,
+                            λ = lambda, r = r, sample = true, nsample = nsamples + 1)
+        println(nmuts)
+        if isnan(DF1[:dnds][1]) | (DF1[:dnds][1] == Inf)
+            continue
+        end
         x = LLoptimizationresults(DF1[:dnds], DF1[:A]; t = 30.0, Amin = 0.05, ρ = 100.0)
         x.DF[:deltatrue] = Δ
-        x.DF[:lambdartrue] = rlambda * SM.r
+        x.DF[:lambdartrue] = rlambda
+        x.DF[:its] = i
+        x.DF[:nsamples] = nsamples
         append!(myDF, x.DF)
+        push!(deltavec, x.Δ)
+        push!(rlambdavec, x.rλ)
+        push!(itvec, i)
+        push!(nmutsdn, nmuts[1])
+        push!(nmutsds, nmuts[2])
+        push!(sampvec, nsamples)
+        push!(rsq, x.DF[:rsq][1])
     end
 end
 
-println("Writing data to file")
-@rput myDF
+DFfit = DataFrame(iterations = itvec,
+nmutsdn = nmutsdn,
+nmutsds = nmutsds,
+delta = deltavec,
+rlambda = rlambdavec,
+nsamples = sampvec,
+rsq = rsq)
+
+DFfit[:product] = DFfit[:delta] .* DFfit[:rlambda];
+
+println("Write data to file")
+@rput DFfit
 R"""
-write_csv(myDF, $(parsed_args["examplefitsout"]))
-""";
-
-
-#####################################################
-# Different bin sizes
-#####################################################
-
-println("Generating some example data with fits using different bin sizes")
-
-#create empty dataframe to store data
-myDF = DataFrame([Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64,
-    Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64, Float64],
-[:dnds, :A, :dndsfit, :dndsfitlq, :dndsfituq, :deltafit, :lambdarfit,
-    :deltafitlq, :lambdarfitlq, :deltafituq, :lambdarfituq, :sedelta, :selambda, :rsq, :deltatrue, :lambdartrue, :stepsize], 0)
-
-for Δ in [0.1, 0.2, 0.3, 0.4, 0.5]
-    println(Δ)
-    for rlam in [0.5]
-        for mygap in [0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.2]
-            Random.seed!(111)
-            println(rlam)
-            rlambda = rlam
-            DF1, SM = simulatepopulation(;Δ = Δ, tend = 30.0, Amin = 0.05, ρ = 100.0, λ = rlambda, Amax = 25.0, gap = mygap)
-            x = LLoptimizationresults(DF1[:dnds], DF1[:A]; t = 30.0, Amin = 0.05, ρ = 100.0)
-            x.DF[:deltatrue] = Δ
-            x.DF[:lambdartrue] = rlambda * SM.r
-            x.DF[:stepsize] = mygap
-            append!(myDF, x.DF)
-        end
-    end
-end
-
-println("Writing data to file")
-@rput myDF
-R"""
-write_csv(myDF, $(parsed_args["exampledifferentbins"]))
+write_csv(DFfit, $(parsed_args["powerout"]))
 """;
