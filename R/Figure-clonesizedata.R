@@ -46,6 +46,13 @@ modelfits <- readRDS(args$datamodelfits)
 binsize <- fits$age$data$n[2] - fits$age$data$n[1]
 totalarea <- mean(unique(df$Nsamples)) * 2
 
+# df %>% filter(impact != "Synonymous") %>%
+#     filter(str_detect(gene, "NOTCH1|TP53")) %>%
+#     filter(str_detect(impact, "Missense|Nonsense")) %>%
+#     group_by(gene, Age2) %>%
+#     summarise(x = mean(sumvaf), lq = quantile(sumvaf, 0.025), uq = quantile(sumvaf, 0.975)) %>%
+#     ggplot(aes(x = Age2, y = x, ymin = lq, ymax = uq)) + geom_linerange() + geom_point() +geom_smooth(method = "lm") + facet_wrap(~gene)
+
 message("Summary of data")
 dftemp <- df %>%
   #filter(gene == "NOTCH1") %>%
@@ -211,7 +218,7 @@ g1 <- dfA %>%
                      .width = c(.66, .95), position = position_dodge(width = 0.75)) +
   theme_cowplot() +
   #ylab(expression(rho~mu~" (Cells/mm2 X mutations per division)")) +
-  ylab(~n[0]~mu/~rho) +
+  ylab(~n[0]~mu/r~lambda~rho) +
   theme_cowplot() +
   #scale_y_log10() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +

@@ -109,12 +109,20 @@ DFresults <- dfg %>%
 (gcompare <- left_join(DFresults, frechetCoef) %>%
   ggplot(aes(x = deltafit, y = coef)) +
   geom_text(aes(label = gene)) +
-  scale_y_log10() +
-  scale_x_log10() +
+  #scale_y_log10() +
+  #scale_x_log10() +
   geom_smooth(method = "lm", se = F) +
   xlab(expression(Delta~" fit - dN/dS")) +
   ylab("Regression coefficient") +
   theme_cowplot())
+
+forlm <- left_join(DFresults, frechetCoef)
+print(summary(lm(deltafit ~ coef, data = forlm)))
+print(summary(lm(log(deltafit) ~ log(coef), data = forlm)))
+print("Correlation")
+print(cor(forlm$deltafit, forlm$coef))
+print("Correlation (logged)")
+print(cor(log(forlm$deltafit), log(forlm$coef)))
 
 message("Generate final figure")
 g <- plot_grid(gwaic, ppcheck + theme(legend.position = c(0.7, 0.9)),

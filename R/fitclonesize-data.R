@@ -17,11 +17,11 @@ parser$add_argument('--rho', type='double',
 parser$add_argument('--binsize', type='double',
                     help="Bin size for fitting", default = 0.005)
 parser$add_argument('--its', type='integer',
-                    help="Progenitor density", default = 5000)
+                    help="Number of iterations in MCMC chain", default = 5000)
 parser$add_argument('--quantile', type='double',
                     help="quantile with which to filter data", default = 0.9)
 parser$add_argument('--minvaf', type='double',
-                    help="Progenitor density", default = 0.008)
+                    help="Min vaf cutoff", default = 0.008)
 args <- parser$parse_args()
 
 
@@ -54,6 +54,7 @@ message("Fit model for age")
 mydat <- df %>%
   filter(impact != "Synonymous") %>%
   filter(str_detect(impact, "Missense|Nonsense")) %>%
+  #filter(str_detect(gene, "NOTCH1|NOTCH2|NOTCH3|SALL1|CREBBP|SPHKAP|FAT1|TP53")) %>%
   group_by(Age) %>%
   mutate(maxvaf = quantile(sumvaf, args$quantile)) %>%
   ungroup() %>%
@@ -67,6 +68,15 @@ mydat <- df %>%
   #filter(C > 1) %>%
   filter(n < maxvaf)
 
+message("Non-synonymous")
+print(dim(df %>%
+  filter(impact != "Synonymous")))
+message("Non-synonymous 5 genes with highest s")
+print(dim(df %>%
+  filter(impact != "Synonymous") %>%
+  filter(str_detect(impact, "Missense|Nonsense")) %>%
+  filter(str_detect(gene, "NOTCH1|NOTCH2|NOTCH3|SALL1|CREBBP|SPHKAP|FAT1|TP53"))))
+
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
 nchains <- args$threads
@@ -79,8 +89,9 @@ fitage <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             data = mydat,
             prior = prior1,
             family = gaussian,
-            control = list(adapt_delta = 0.9),
+            control = list(adapt_delta = 0.95),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitage<- add_criterion(fitage, c("loo", "waic", "R2"))
@@ -120,8 +131,9 @@ fitagesynon <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             data = mydat,
             prior = prior1,
             family = gaussian,
-            control = list(adapt_delta = 0.9),
+            control = list(adapt_delta = 0.95),
             chains = nchains,
+            cores = nchains,
             iter = args$its)
 
 fitagesynon <- add_criterion(fitagesynon, c("loo", "waic", "R2"))
@@ -142,7 +154,7 @@ mydat <- df %>%
   mutate(nmuts = n(),
         maxvaf = quantile(sumvaf, args$quantile)) %>%
   ungroup() %>%
-  mutate(nidx = midcut(sumvaf, args$minvaf, 2, 2 * args$binsize)) %>%
+  mutate(nidx = midcut(sumvaf, args$minvaf * 2, 2, 2 * args$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(gene, nidx, maxvaf) %>%
   summarise(C = n()) %>%
@@ -169,7 +181,7 @@ fitgene <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             data = mydat,
             prior = prior1,
             family = gaussian,
-            control = list(adapt_delta = 0.99),
+            control = list(adapt_delta = 0.99, max_treedepth = 12),
             chains = nchains,
             cores = nchains,
             iter = args$its)
@@ -181,6 +193,7 @@ print(bayes_R2(fitgene))
 message("")
 message("###########################################################")
 message("Saving file")
-out<- list(gene = fitgene, age = fitage,
+out <- list(gene = fitgene,
+            age = fitage,
             agesynon = fitagesynon)
 saveRDS(out, args$output)

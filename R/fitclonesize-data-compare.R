@@ -81,6 +81,7 @@ fitmodel1 <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.9),
             chains = nchains,
             cores = nchains,
+            save_all_pars = TRUE,
             iter = args$its)
 
 fitmodel1 <- add_criterion(fitmodel1, c("loo", "waic", "R2"))
@@ -101,6 +102,7 @@ fitmodel2 <- brm(bf(C ~ (A) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.9),
             chains = nchains,
             cores = nchains,
+            save_all_pars = TRUE,
             iter = args$its)
 
 fitmodel2 <- add_criterion(fitmodel2, c("loo", "waic", "R2"))
@@ -119,6 +121,7 @@ fitmodel3 <- brm(bf(C ~ (A/n),
                control = list(adapt_delta = 0.9),
                chains = nchains,
                cores = nchains,
+	       save_all_pars = TRUE,
                iter = args$its)
 
 fitmodel3 <- add_criterion(fitmodel3, c("loo", "waic", "R2"))
@@ -141,6 +144,7 @@ fitmodel4 <- brm(bf(C ~ (A / (n ^ C)) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.99),
             chains = nchains,
             cores = nchains,
+	    save_all_pars = TRUE,
             iter = args$its)
 
 fitmodel4 <- add_criterion(fitmodel4, c("loo", "waic", "R2"))

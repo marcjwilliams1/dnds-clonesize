@@ -61,6 +61,27 @@ rule clonesizesims:
             --threads {threads}
         """
 
+rule clonesizesimsdist:
+    input:
+        data="results/simulations/clonesize_overtime-dist.csv",
+        datahitchike="results/simulations/clonesize_hitchikers.csv"
+    output:
+        "results/dataforfigures/simulation-clonesizefit-dist.Rdata"
+    threads: 4
+    params:
+        singularityimage=config["stansingularity"]
+    shell:
+        """
+        module unload python
+        module load singularity
+        singularity exec {params.singularityimage} \
+            Rscript R/fitclonesize-sims.R \
+            --simulationdata {input.data} \
+            --simulationdatahitchike {input.datahitchike} \
+            --output {output} \
+            --threads {threads}
+        """
+
 rule clonesizedata:
     input:
         oesophaguspatientinfo="data/oesophagus/patient_info.xlsx",

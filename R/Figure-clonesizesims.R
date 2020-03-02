@@ -18,6 +18,8 @@ parser$add_argument('--rho', type='double',
                     help="Progenitor density", default = 5000.0)
 parser$add_argument('--binsize', type='double',
                     help="Binsize for fitting", default = 0.002)
+parser$add_argument('--delta', type='double',
+                    help="Delta value to use for plots", default = 0.1)
 args <- parser$parse_args()
 
 
@@ -33,6 +35,7 @@ sims <- read_csv(args$simulationdata, guess_max = 10^5) %>%
 
 fits <- readRDS(args$simulationfits)
 fit <- fits$fit
+options(scipen = 999)
 
 message("Transform data")
 Nt0 <- function(rlam = 0.5, delta = 0.0, t = 10.0){
@@ -89,7 +92,7 @@ mydat <- sims %>%
 params <- distinct(mydat, gene, condition, A, logB, B, t, delta, rlam, mu, Nsims, N0) %>%
   mutate(condition = gene) %>%
   mutate(yax = paste0(t, ", ", delta)) %>%
-  mutate(yaxmu = paste0(round(mu, 5)))
+  mutate(yaxmu = paste0(round(mu, 6)))
 Nsims <- params$Nsims[1]
 
 message("Summarize parameter fits")
@@ -106,7 +109,7 @@ gA <- fit %>%
                       .width = c(.66, .95), position = position_nudge(y = 0.0)) +
   # data
   geom_point(aes(x = A / (Nsims * (args$binsize))), data = params, col = "firebrick", fill = "white", shape = 21, size = 2) +
-  xlab(~n[0]~mu/~rho) +
+  xlab(~n[0]~mu/r~lambda~rho) +
   coord_flip() +
   theme_cowplot() +
   ylab(expression("Input "~mu)) +
@@ -136,7 +139,7 @@ gB <- fit %>%
 message("Plot fits")
 
 gfits <- mydat %>%
-    filter(delta == 0.1) %>%
+    filter(delta == args$delta) %>%
     data_grid(n = unique(mydat$n), gene) %>%
     add_predicted_draws(fit, n = 1000) %>%
     left_join(., mydat) %>%
@@ -185,7 +188,7 @@ summary(lm(x~log(t), f2))
 
 message("Hitchikers")
 
-dfparams <- data.frame(tstr = unique(fits$hitchikers$data$condition), Nsims = 10^4, mu = 0.01 / 3, N0 = 10^3, 
+dfparams <- data.frame(tstr = unique(fits$hitchikers$data$condition), Nsims = 10^4, mu = 0.01 / 3, N0 = 10^3,
                        rho = args$rho, rlam = 0.5) %>%
   separate(tstr, c(NA, "t"), "_") %>%
   mutate(t = as.numeric(t), tstr = paste0("t_", t)) %>%
@@ -251,7 +254,6 @@ gfits <- fits$hitchikers$data %>%
   ylab("Counts") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-save_plot(args$suppfigure[2], plot_grid(plot_grid(gA, gB, ncol = 1, labels = c("a", "b")), 
+save_plot(args$suppfigure[2], plot_grid(plot_grid(gA, gB, ncol = 1, labels = c("a", "b")),
                                         gfits, ncol = 2, labels = c("", "c")),
           base_height = 7, base_width = 20)
-

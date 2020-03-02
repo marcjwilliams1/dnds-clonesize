@@ -15,6 +15,20 @@ rule ModellingNormalTissue:
             --nsamples {params.nsamples}
         """
 
+rule ModellingNormalTissueDistribution:
+    output:
+        exp="results/dataforfigures/stemcell_simulation_examplefits_distribution-exp.csv",
+        beta="results/dataforfigures/stemcell_simulation_examplefits_distribution-beta.csv"
+    shell:
+        """
+        module load R/3.5.3
+        module load julia
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
+        julia julia/ModellingNormalTissue-distribution.jl \
+            --resultsfile1 {output.exp} \
+            --resultsfile2 {output.beta}
+        """
+
 rule ModellingNormalTissuePower:
     output:
         stemcellpower="results/dataforfigures/stemcell_simulation_power.csv"
@@ -32,12 +46,14 @@ rule ModellingNormalTissuePower:
 
 rule ModellingNormalTissueCloneSize:
     output:
-        resultsfile="results/simulations/clonesize_overtime.csv"
+        resultsfile="results/simulations/clonesize_overtime.csv",
+        resultsfile2="results/simulations/clonesize_overtime-dist.csv"
     shell:
         """
         module load julia
         julia julia/ModellingNormalTissue-clonesize.jl \
-            --resultsfile {output.resultsfile}
+            --resultsfile {output.resultsfile} \
+            --resultsfile2 {output.resultsfile2}
         """
 
 rule ModellingNormalTissueHitchikers:
