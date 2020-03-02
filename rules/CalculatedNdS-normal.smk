@@ -17,12 +17,9 @@ rule CalculatedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
         Rscript R/CalculatedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -60,12 +57,9 @@ rule CalculatedNdSNormalSNV:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
         Rscript R/CalculatedNdS-normal-snv.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -95,11 +89,9 @@ rule MakeFilesSSB:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module load R
-        module load gcc
-        module load julia
         Rscript R/SSB-dNdS-files.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \
@@ -122,12 +114,9 @@ rule CalculateSitedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
         Rscript R/CalculatesitedNdS-normal.R \
             --patientinfo {input.oesophaguspatientinfo} \
             --oesophagusdata {input.oesophagusdata} \

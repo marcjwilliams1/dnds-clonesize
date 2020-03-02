@@ -104,9 +104,9 @@ rule formatresultsSSB:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module load R
         Rscript R/formatSSB.R \
             --inputfile {input.all} \
             --outputfile {output.all} \

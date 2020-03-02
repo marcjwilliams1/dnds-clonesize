@@ -5,10 +5,9 @@ rule brms:
     output:
         "results/dataforfigures/brmsfit.Rdata"
     threads: 4
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module load R/3.5.3
-        module load gcc
         Rscript R/fitbrms.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
@@ -23,16 +22,10 @@ rule brmssites:
         fits = "results/dataforfigures/brmsfit-sites.Rdata",
         coefficients = "results/dataforfigures/brmsfit-sites-coef.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        #module load gcc
-        #module load R/3.5.3
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitbrms-sites.R \
+        Rscript R/fitbrms-sites.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
             --output {output.fits} \
@@ -47,14 +40,10 @@ rule clonesizesims:
     output:
         "results/dataforfigures/simulation-clonesizefit.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-sims.R \
+        Rscript R/fitclonesize-sims.R \
             --simulationdata {input.data} \
             --simulationdatahitchike {input.datahitchike} \
             --output {output} \
@@ -68,14 +57,10 @@ rule clonesizesimsdist:
     output:
         "results/dataforfigures/simulation-clonesizefit-dist.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-sims.R \
+        Rscript R/fitclonesize-sims.R \
             --simulationdata {input.data} \
             --simulationdatahitchike {input.datahitchike} \
             --output {output} \
@@ -89,14 +74,10 @@ rule clonesizedata:
     output:
         "results/dataforfigures/data-clonesizefit.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-data.R \
+        Rscript R/fitclonesize-data.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
             --output {output} \
@@ -110,14 +91,10 @@ rule clonesizedatacompare:
     output:
         "results/dataforfigures/data-clonesizefit-models.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-data-compare.R \
+        Rscript R/fitclonesize-data-compare.R \
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
             --output {output} \
