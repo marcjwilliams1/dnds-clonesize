@@ -11,10 +11,11 @@ source /data/home/hfx042/bin/snakemake/bin/activate
 
 snakemake --unlock
 
-#snakemake --jobs 80 \
-#  --cluster-config cluster.yaml \
-#  --cluster "qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o #{cluster.output} -j y -N {cluster.name} -pe smp {threads}"
+module load singularity
 
+CLUSTER_CMD=("qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o {cluster.output} -j y -N {cluster.name} -pe smp {threads} -l node_type=nxv")
 snakemake --jobs 80 \
+  --use-singularity \
+  --jobscript jobscript.sh \
   --cluster-config cluster.yaml \
-  --cluster "qsub -cwd -l h_rt={cluster.time} -l h_vmem={cluster.mem} -o {cluster.output} -j y -N {cluster.name} -pe smp {threads} -l node_type=nxv"
+  --cluster "${CLUSTER_CMD}"

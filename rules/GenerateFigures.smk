@@ -146,13 +146,9 @@ rule Figure5:
     output:
         figure="Figures/Figure5.pdf",
         suppfigures=expand("Figures/Figure5-S{S}.pdf", S = [3]),
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
         Rscript R/Figure-clonesizedata.R \
             --datafits {input.fits} \
             --datamodelfits {input.modelfits} \
@@ -160,7 +156,6 @@ rule Figure5:
             --oesophagusdata {input.oesophagusdata} \
             --oesophagusmetadata {input.oesophaguspatientinfo} \
             --suppfigures {output.suppfigures}
-
         """
 
 rule FigureCloneSizeData2:
