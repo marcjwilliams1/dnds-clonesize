@@ -1,6 +1,6 @@
 # Snakemake workflow: dnds-clonesize
 
-This is a snakemake workflow to reproduce figures from "Measuring the distribution of fitness effects in somatic evolution by combining clonal dynamics with dN/dS ratios"
+This is a snakemake workflow to reproduce figures from [Measuring the distribution of fitness effects in somatic evolution by combining clonal dynamics with dN/dS ratios](https://elifesciences.org/articles/48714).
 
 ## Authors
 
@@ -20,4 +20,4 @@ singularity pull shub://marcjwilliams1/dnds-clonesize-R-container
 ```
 
 ## Jupyter notebooks
-Also included are jupyter notebooks in the `notebooks/` folder for each of the main steps. These are perhaps easier to parse than the pipeline if you're interested in looking at how a particular analysis was done.
+Also included are jupyter notebooks in the `notebooks/` folder for each of the main steps. These are perhaps easier to parse than the pipeline if you're interested in looking at how a particular analysis was done although are by now a bit out of date.
