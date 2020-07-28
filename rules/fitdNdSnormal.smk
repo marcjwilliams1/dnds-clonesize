@@ -92,9 +92,9 @@ rule fitdNdSnormalSNV:
 
 rule formatresultsSSB:
     input:
-        all = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),
-        missense = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}_mis.txt", ssb_genes=SSB_genes),
-        nonsense = expand("results/oesophagus/SSBresults/allpatients_dnds_{ssb_genes}_non.txt", ssb_genes=SSB_genes),
+        all = expand("data/SSBresults/allpatients_dnds_{ssb_genes}.txt", ssb_genes=SSB_genes),
+        missense = expand("data/SSBresults/allpatients_dnds_{ssb_genes}_mis.txt", ssb_genes=SSB_genes),
+        nonsense = expand("data/SSBresults/allpatients_dnds_{ssb_genes}_non.txt", ssb_genes=SSB_genes),
     output:
         all = "results/oesophagus/SSBresults/SSBdnds_results.csv",
         missense = "results/oesophagus/SSBresults/SSBdnds_results_missense.csv",

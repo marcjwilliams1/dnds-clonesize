@@ -27,7 +27,7 @@ rule all:
         expand("Figures/Figure5-S{FIG}.pdf", FIG = [1,2,3,4,5]),
         "Figures/Extra/Figure-Extra-binsize.pdf",
         "Figures/Extra/Figure-Extra-SimsDistributionRegression.pdf",
-        expand(directory("results/oesophagus/SSBfiles/{oes_sample}/"), oes_sample=OES_SAMPLES),
+        directory(expand("results/oesophagus/SSBfiles/{oes_sample}/", oes_sample=OES_SAMPLES)),
         "results/oesophagus/SSBresults/SSBdnds_results.csv",
         "results/dataforfigures/oesophagusfit-SSB.csv",
         "results/dataforfigures/brmsfit.Rdata",
