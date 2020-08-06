@@ -1,0 +1,169 @@
+__default__:
+    time: "24:00"
+    name: "{rule}_snakemake"
+    mem: 8G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+CalculatedNdSNormal:
+    time: "24:00"
+    mem: 20G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+CalculateSitedNdSNormal:
+    time: "24:00"
+    mem: 20G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+CalculatedNdSNormalSNV:
+    time: "24:00"
+    mem: 20G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+downloadTCGA:
+    time: "24:00"
+    mem: 10G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+combineTCGA:
+    time: "2:00"
+    mem: 50G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+GenerateFigures:
+    time: "1:00"
+    mem: 1G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+ModellingCancer:
+    time: "5:00"
+    mem: 16G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+fitdNdSnormal:
+    time: "20:00"
+    mem: 10G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+fitdNdSnormalSNV:
+    time: "20:00"
+    mem: 10G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure1:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure2:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure3:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure4:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+Figure5:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+FigureS6:
+    time: "00:30"
+    mem: 4G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+MakeFilesSSB:
+    time: "1:00"
+    mem: 2G
+    resources: "\"span[hosts=1]\""
+    output: "{config[log_dir]}/{rule}.{wildcards.oes_sample}.out"
+    error: "{config[log_dir]}/{rule}.{wildcards.oes_sample}.out"
+
+brms:
+    time: "20:00"
+    mem: 8G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+brmssites:
+    time: "20:00"
+    mem: 2G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+clonesizedata:
+    time: "20:00"
+    mem: 2G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+clonesizedatacompare:
+    time: "20:00"
+    mem: 2G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+clonesizesims:
+    time: "20:00"
+    mem: 2G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+clonesizesimsdist:
+    time: "20:00"
+    mem: 2G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+ModellingNormalTissueHitchikers:
+    time: "10:00"
+    mem: 8G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+ModellingNormalTissueCloneSize:
+    time: "120:00"
+    mem: 16G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
+
+ModellingNormalTissueDistribution:
+    time: "96:00"
+    mem: 16G
+    output: "{config[log_dir]}/{rule}.out"
+    error: "{config[log_dir]}/{rule}.out"
