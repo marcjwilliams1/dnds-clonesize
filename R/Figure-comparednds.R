@@ -7,45 +7,24 @@ library(forcats)
 library(ggforce)
 library(Hmisc)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Generate Final Figures")
-parser$add_argument('--figure', type='character',
-                    help="Output figure files", default = NULL)
-parser$add_argument('--suppfigures', type='character',
-                    help="Outpute figure files", nargs = "+", default = NULL)
-parser$add_argument('--alldndscv', type='character',
-                    help="dndscv files for all genes")
-parser$add_argument('--SSB', type='character',
-                    help="SSB file for all genes")
-parser$add_argument('--dndscvmissense', type='character',
-                    help="dndscv missense")
-parser$add_argument('--dndscvnonsense', type='character',
-                    help="dndscv nonsense")
-parser$add_argument('--dndscvnonsensepergene', type='character',
-                    help="dndscv nonsense per gene")
-parser$add_argument('--dndscvmissensepergene', type='character',
-                    help="dndscv missense per gene")
-args <- parser$parse_args()
-
 message("Read in files....")
-dndscvall <- read_csv(args$alldndscv) %>%
+dndscvall <- read_csv(snakemake@input$alldndscv) %>%
   mutate(mutation_class = "All")
-dndscvnonsense <- read_csv(args$dndscvnonsense) %>%
+dndscvnonsense <- read_csv(snakemake@input$dndscvfitnonsense) %>%
   mutate(mutation_class = "Nonsense")
-dndscvmissense <- read_csv(args$dndscvmissense) %>%
+dndscvmissense <- read_csv(snakemake@input$dndscvfitmissense) %>%
   mutate(mutation_class = "Missense")
-dndscvnonsensepergene <- read_csv(args$dndscvnonsensepergene) %>%
+dndscvnonsensepergene <- read_csv(snakemake@input$dndscvfitnonsensepergene) %>%
   mutate(mutation_class = "Nonsense")
-dndscvmissensepergene <- read_csv(args$dndscvmissensepergene) %>%
+dndscvmissensepergene <- read_csv(snakemake@input$dndscvfitmissensepergene) %>%
   mutate(mutation_class = "Missense")
 
 dndscv <- bind_rows(dndscvall, dndscvnonsense, dndscvmissense)
-SSB <- read_csv(args$SSB)
+SSB <- read_csv(snakemake@input$SSB)
 dfglobal <- left_join(dndscv, SSB %>% filter(gene == "All"), by = c("patient", "Age", "Age2", "mutation_class"))
 
 dndscv <- bind_rows(dndscvnonsensepergene, dndscvmissensepergene)
-SSB <- read_csv(args$SSB)
+SSB <- read_csv(snakemake@input$SSB)
 dfgene <- inner_join(dndscv, SSB %>% filter(gene != "All"), by = c("patient", "Age", "Age2", "mutation_class", "gene"))
 
 
@@ -137,7 +116,7 @@ gmiss <- SSB %>%
   ggtitle("PD30273, TP53, Missense")
 
 gout <- plot_grid(plot_grid(gmiss, g2,labels = c("a", "b")), g1, ncol = 1, labels = c("", "c"))
-save_plot(args$suppfigures[1], gout, base_height = 8, base_width = 13)
+save_plot(snakemake@output$suppfigures[1], gout, base_height = 8, base_width = 13)
 
 
 forlm <- summarydf
@@ -198,4 +177,4 @@ gnon <- SSB %>%
 
 g <- plot_grid(gmiss, gnon, ncol = 2, labels = c("a", "b"))
 
-save_plot(args$suppfigures[2], g, base_height = 8, base_width = 16)
+save_plot(snakemake@output$suppfigures[2], g, base_height = 8, base_width = 16)

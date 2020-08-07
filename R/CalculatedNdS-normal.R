@@ -6,51 +6,18 @@ library(GenomicRanges)
 library(readr)
 library(argparse)
 
-parser <- ArgumentParser(description = "Calculate dN/dS normal")
-parser$add_argument('--patientinfo', type='character',
-                    help="Patient info xlsx file")
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Oesophagus clone size data")
-parser$add_argument('--skindata', type='character',
-                    help="Skin clone size data")
-parser$add_argument('--oesophagusdnds', type='character',
-                    help="Oesophagus dnds")
-parser$add_argument('--oesophagusdndsgenes', type='character',
-                    help="Oesophagus dnds for genes")
-parser$add_argument('--skindnds', type='character',
-                    help="Skin dnds")
-parser$add_argument('--skindndsgenes', type='character',
-                    help="Skin dnds for neutral genes")
-parser$add_argument('--oesophagusdndsneutral', type='character',
-                    help="Oesophagus dnds neutral")
-parser$add_argument('--oesophagusdndsgenesneutral', type='character',
-                    help="Oesophagus dnds per gene for neutral genes")
-parser$add_argument('--singlepatient', type = 'character',
-                    help="Single patient ID")
-parser$add_argument('--singlepatientdnds', type = 'character',
-                    help="Output file for dnds in a single patient")
-parser$add_argument('--singlepatientdndsgenes', type = 'character',
-                    help="Output file for dnds per gene in a single patient")
-parser$add_argument('--step', type = 'double',
-                    help="stepsize for interval dN/dS")
-parser$add_argument('--minarea', type = 'double',
-                    help="Min area for interval dN/dS")
-parser$add_argument('--maxarea', type = 'double',
-                    help="Min area for interval dN/dS")
-args <- parser$parse_args()
-
 message("Read in meta data for the oesophagus")
-dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
+dfdonor <- read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(patient = PD)
 
 message("Read in mutation data for the oesophagus")
-df <- read_csv(args$oesophagusdata) %>%
+df <- read_csv(snakemake@input$oesophagusdata) %>%
   mutate(sumvaf = sumvaf * 2)
 
 message("Create vector of intervals for i-dN/dS")
-minarea <- args$minarea
-maxarea <- args$maxarea
-step <- args$step
+minarea <- snakemake@params$minarea
+maxarea <- snakemake@params$maxarea
+step <- snakemake@params$step
 areacutoff <- seq(minarea, maxarea, step)
 
 message("Find unique genes")
@@ -84,8 +51,8 @@ for (p in unique(df$donor)){
 }
 
 message("Write output to file")
-write_csv(dfdnds.patient, args$oesophagusdnds)
-write_csv(dfdnds.genes.patient, args$oesophagusdndsgenes)
+write_csv(dfdnds.patient, snakemake@output$oesophagusdnds)
+write_csv(dfdnds.genes.patient, snakemake@output$oesophagusdndsgenes)
 
 message("Make vector of genes that show no evidence of selection")
 target_genesneutral <- target_genes[!target_genes %in%
@@ -96,9 +63,10 @@ target_genesneutral <- target_genes[!target_genes %in%
                       "EPHA2", "IRF6", "FGFR2")]
 
 
-minarea <- args$minarea
-maxarea <- args$maxarea
-step <- args$step
+message("Create vector of intervals for i-dN/dS")
+minarea <- snakemake@params$minarea
+maxarea <- snakemake@params$maxarea
+step <- snakemake@params$step
 areacutoff <- seq(minarea, maxarea, step)
 target_genes <- unique(df$gene)
 
@@ -123,12 +91,12 @@ for (cutoff in areacutoff){
 }
 
 message("Write i-dN/dS for neutral genes to file.")
-write_csv(dfdnds, args$oesophagusdndsneutral)
-write_csv(dfdnds.genes, args$oesophagusdndsgenesneutral)
+write_csv(dfdnds, snakemake@output$oesophagusdndsneutral)
+write_csv(dfdnds.genes, snakemake@output$oesophagusdndsgenesneutral)
 
 message("Filter for single patient")
 df1 <- df %>%
-   filter(donor == args$singlepatient) %>%
+   filter(donor == snakemake@params$singlepatient) %>%
    mutate(sumvaf = sumvaf * 2) %>% #times by 2 to convert to area
    mutate(x = cut(sumvaf, breaks = c(0.004 * 2, 0.01 * 2, 0.03 * 2, 0.07 * 2, 0.2 * 2, 6 * 2))) %>%
    group_by(x) %>%
@@ -160,8 +128,8 @@ for (f in sort(unique(df1$medianvaf))){
 }
 
 message("Write single patient to file")
-write_csv(dfdnds, args$singlepatientdnds)
-write_csv(dfdnds.genes, args$singlepatientdndsgenes)
+write_csv(dfdnds, snakemake@output$singlepatientdnds)
+write_csv(dfdnds.genes, snakemake@output$singlepatientdndsgenes)
 
 
 ################################################
@@ -169,13 +137,13 @@ write_csv(dfdnds.genes, args$singlepatientdndsgenes)
 ################################################
 
 message("Read in skin data")
-df <- read_csv(args$skindata)
+df <- read_csv(snakemake@input$skindata)
 data("dataset_normalskin_genes", package="dndscv")
 target_genes
 
-minarea <- args$minarea + 0.01
-maxarea <- args$maxarea
-step <- args$step
+minarea <- snakemake@params$minarea + 0.01
+maxarea <- snakemake@params$maxarea
+step <- snakemake@params$step
 areacutoff <- seq(minarea, maxarea, step)
 
 dfdnds.patient <- data.frame()
@@ -204,5 +172,5 @@ for (p in unique(df$patient)){
 }
 
 message("Write skin i-dN/dS values to file")
-write_csv(dfdnds.patient, args$skindnds)
-write_csv(dfdnds.genes.patient, args$skindndsgenes)
+write_csv(dfdnds.patient, snakemake@output$skindnds)
+write_csv(dfdnds.genes.patient, snakemake@output$skindndsgenes)

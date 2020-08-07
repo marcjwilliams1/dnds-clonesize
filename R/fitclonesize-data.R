@@ -26,13 +26,13 @@ args <- parser$parse_args()
 
 
 message("Read in data")
-df <- read_csv(args$oesophagusdata)
-donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+df <- read_csv(snakemake@input$oesophagusdata)
+donor <- readxl::read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(donor = PD)
 df <- left_join(df, donor)
 
 df <- df %>%
-    filter(sumvaf > args$minvaf)
+    filter(sumvaf > snakemake@config$paramsdata$minvaf)
 
 # Functions to calculate ground truth
 
@@ -56,9 +56,9 @@ mydat <- df %>%
   filter(str_detect(impact, "Missense|Nonsense")) %>%
   #filter(str_detect(gene, "NOTCH1|NOTCH2|NOTCH3|SALL1|CREBBP|SPHKAP|FAT1|TP53")) %>%
   group_by(Age) %>%
-  mutate(maxvaf = quantile(sumvaf, args$quantile)) %>%
+  mutate(maxvaf = quantile(sumvaf, snakemake@config$paramsdata$quantile)) %>%
   ungroup() %>%
-  mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  mutate(nidx = midcut(sumvaf, snakemake@config$paramsdata$minvaf, 2, snakemake@config$paramsdata$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(Age, nidx, maxvaf) %>%
   summarise(C = n()) %>%
@@ -79,7 +79,7 @@ print(dim(df %>%
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
-nchains <- args$threads
+nchains <- snakemake@threads
 
 message("Fit model...")
 fitage <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
@@ -92,7 +92,7 @@ fitage <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.95),
             chains = nchains,
             cores = nchains,
-            iter = args$its)
+            iter = snakemake@config$paramsdata$its)
 
 fitage<- add_criterion(fitage, c("loo", "waic", "R2"))
 print(fitage)
@@ -107,9 +107,9 @@ message("Fit model for age synonymous")
 mydat <- df %>%
   filter(impact == "Synonymous") %>%
   group_by(Age) %>%
-  mutate(maxvaf = quantile(sumvaf, args$quantile)) %>%
+  mutate(maxvaf = quantile(sumvaf, snakemake@config$paramsdata$quantile)) %>%
   ungroup() %>%
-  mutate(nidx = midcut(sumvaf, args$minvaf, 2, args$binsize)) %>%
+  mutate(nidx = midcut(sumvaf, snakemake@config$paramsdata$minvaf, 2, snakemake@config$paramsdata$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(Age, nidx, maxvaf) %>%
   summarise(C = n()) %>%
@@ -121,7 +121,7 @@ mydat <- df %>%
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
-nchains <- args$threads
+nchains <- snakemake@threads
 
 message("Fit model...")
 fitagesynon <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
@@ -134,7 +134,7 @@ fitagesynon <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.95),
             chains = nchains,
             cores = nchains,
-            iter = args$its)
+            iter = snakemake@config$paramsdata$its)
 
 fitagesynon <- add_criterion(fitagesynon, c("loo", "waic", "R2"))
 print(fitagesynon)
@@ -152,9 +152,9 @@ mydat <- df %>%
   mutate(gene = paste0(gene, "-", Age2)) %>%
   group_by(gene) %>%
   mutate(nmuts = n(),
-        maxvaf = quantile(sumvaf, args$quantile)) %>%
+        maxvaf = quantile(sumvaf, snakemake@config$paramsdata$quantile)) %>%
   ungroup() %>%
-  mutate(nidx = midcut(sumvaf, args$minvaf * 2, 2, 2 * args$binsize)) %>%
+  mutate(nidx = midcut(sumvaf, snakemake@config$paramsdata$minvaf * 2, 2, 2 * snakemake@config$paramsdata$binsize)) %>%
   filter(!is.na(nidx)) %>%
   group_by(gene, nidx, maxvaf) %>%
   summarise(C = n()) %>%
@@ -171,7 +171,7 @@ mydat <- df %>%
 
 prior1 <- prior(normal(5, 2), nlpar = "A", lb = 0.0001) +
   prior(normal(0, 5), nlpar = "B")
-nchains <- args$threads
+nchains <- snakemake@threads
 
 message("Fit model...")
 fitgene <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
@@ -184,7 +184,7 @@ fitgene <- brm(bf(C ~ (A / n) * exp(-n / exp(B)),
             control = list(adapt_delta = 0.99, max_treedepth = 12),
             chains = nchains,
             cores = nchains,
-            iter = args$its)
+            iter = snakemake@config$paramsdata$its)
 
 fitgene<- add_criterion(fitgene, c("loo", "waic", "R2"))
 print(fitgene)
@@ -196,4 +196,4 @@ message("Saving file")
 out <- list(gene = fitgene,
             age = fitage,
             agesynon = fitagesynon)
-saveRDS(out, args$output)
+saveRDS(out, snakemake@output[[1]])

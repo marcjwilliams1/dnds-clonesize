@@ -1,44 +1,24 @@
-using Pkg
-#Pkg.build("RCall")
 using CSV
 using DataFrames
-using ArgParse
 using RCall
 
 @rimport readr as readr
 
 # load functions to fit data via least squares
-include("optim.jl")
-
-#parse arguments
-s = ArgParseSettings()
-@add_arg_table s begin
-    "--oesophagusdndsdata"
-        help = "Oesophagus dnds values"
-    "--oesophagusdndsdata_miss"
-        help = "Oesophagus dnds values - missense"
-    "--oesophagusdndsdata_non"
-        help = "Oesophagus dnds values - nonsense"
-    "--oesophagusmetadata"
-        help = "Information on patient ages etc"
-    "--oesophagusfit"
-        help = "Fits for oesophagus missense mutations"
-end
-
-parsed_args = parse_args(ARGS, s)
-println(parsed_args)
+println(snakemake)
+include(string(snakemake.scriptdir, "/optim.jl"))
 
 println("Read in data...")
-println(parsed_args["oesophagusmetadata"])
+println(snakemake.input["oesophagusmetadata"])
 
-DFdonor = rcopy(readr.read_csv(parsed_args["oesophagusmetadata"]))
+DFdonor = rcopy(readr.read_csv(snakemake.input["oesophagusmetadata"]))
 
 println("Reading in per gene data...")
-DF = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata"]))
+DF = rcopy(readr.read_csv(snakemake.input["all"]))
 DF[:A] = 2 .* DF[:cutoff];
-DFnon = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata_non"], guess_max = 10^5))
+DFnon = rcopy(readr.read_csv(snakemake.input["nonsense"], guess_max = 10^5))
 DFnon[:A] = 2 .* DFnon[:cutoff];
-DFmis = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata_miss"], guess_max = 10^5))
+DFmis = rcopy(readr.read_csv(snakemake.input["missense"], guess_max = 10^5))
 DFmis[:A] = 2 .* DFmis[:cutoff];
 println("Data read in")
 
@@ -164,5 +144,5 @@ append!(myDFall, myDFnon)
 @rput myDFall
 R"""
 library(readr)
-write_csv(myDFall, $(parsed_args["oesophagusfit"]))
+write_csv(myDFall, $(snakemake.output["oesophagusfit"]))
 """;

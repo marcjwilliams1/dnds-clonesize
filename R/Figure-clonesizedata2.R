@@ -7,23 +7,7 @@ library(bayesplot)
 library(modelr)
 library(cowplot)
 
-
-parser <- ArgumentParser(description = "Plot simulation fits output")
-parser$add_argument('--datafits', type='character',
-                    help="Data fits")
-parser$add_argument('--figure', type='character',
-                    help="Output figure files", default = NULL)
-parser$add_argument('--oesophagusmetadata', type='character',
-                    help=" oesophagus meta data")
-parser$add_argument('--suppfigures', type='character',
-                    help="Output figure files", nargs = "+")
-parser$add_argument('--rho', type='double',
-                    help="Progenitor density", default = 5000.0)
-parser$add_argument('--oesophagusfitmissense', type='character',
-                    help="Fits for missense mutations oesophagus")
-args <- parser$parse_args()
-
-modelfits <- readRDS(args$datafits)
+modelfits <- readRDS(snakemake@input$datafits)
 
 message("Perform some model selection")
 waicdf <- data.frame(waic = c(modelfits$frechet$waic$estimates[3],
@@ -78,7 +62,7 @@ ppcheck <- ppchecklognormal
 (g <- plot_grid(ppcheckfrech + ggtitle("Frechet"),
           ppchecklognormal + ggtitle("Log normal"),
           ppchecknormal + ggtitle("Normal"), ncol = 3))
-save_plot(args$suppfigure[2], g, base_aspect_ratio = 4.0)
+save_plot(snakemake@output$suppfigure[2], g, base_aspect_ratio = 4.0)
 
 
 frechetCoef <- modelfits$lognormal %>%
@@ -98,7 +82,7 @@ frechetCoef <- modelfits$lognormal %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1)))
 
 
-dfg <- read_csv(args$oesophagusfitmissense)
+dfg <- read_csv(snakemake@input$oesophagusfitmissense)
 DFresults <- dfg %>%
   group_by(gene, deltafit, nmutations, deltafitlq, deltafituq) %>%
   summarise(rsq = first(rsq)) %>%
@@ -128,7 +112,7 @@ message("Generate final figure")
 g <- plot_grid(gwaic, ppcheck + theme(legend.position = c(0.7, 0.9)),
                gcompare, ncol = 3, labels = c("a", "b", "c"), align = "h")
 gall <- plot_grid(gsummary, gcompare, ncol = 2, labels = c("a", "b"), rel_widths = c(1.0, 0.3))
-save_plot(args$suppfigures[1], gall, base_height = 5, base_width = 20)
+save_plot(snakemake@output$suppfigures[1], gall, base_height = 5, base_width = 20)
 
 message("Linear regression")
 dat <- left_join(DFresults, frechetCoef)

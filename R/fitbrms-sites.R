@@ -6,25 +6,9 @@ theme_set(theme_cowplot())
 library(jcolors)
 library(tidybayes)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Fit brms models")
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Mutations and VAF for oesophagus data")
-parser$add_argument('--oesophagusmetadata', type='character',
-                    help=" oesophagus meta data")
-parser$add_argument('--output', type='character',
-                    help="Output file for brms fits")
-parser$add_argument('--outputcoef', type='character',
-                    help="Output file for coefficients")
-parser$add_argument('--threads', type='integer',
-                    help="Number of threads", default = 1)
-args <- parser$parse_args()
-
-
 message("Read in data")
-df <- read_csv(args$oesophagusdata)
-donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+df <- read_csv(snakemake@input$oesophagusdata)
+donor <- readxl::read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(donor = PD)
 df <- left_join(df, donor)
 
@@ -37,7 +21,7 @@ dat <- df %>%
 message(summary(dat))
 
 message("Define brms paramters")
-nchains <- args$threads
+nchains <- snakemake@threads
 its <- 5000
 formula <- bf(area ~ Age2 + (1 + Age2|aachange))
 
@@ -87,5 +71,5 @@ message("")
 message("###########################################################")
 message("Saving file")
 
-saveRDS(out, args$output)
-saveRDS(outcoef, args$outputcoef)
+saveRDS(out, snakemake@output$fits)
+saveRDS(outcoef, snakemake@output$coefficients)

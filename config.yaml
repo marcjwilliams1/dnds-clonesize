@@ -10,6 +10,26 @@ idndslimits:
     step:
         - 0.05
 
+params:
+    rho:
+        - 5000
+    binsize:
+        - 0.002
+    delta:
+        - 0.1
+
+paramsdata:
+    rho:
+        - 5000
+    binsize:
+        - 0.005
+    its:
+        - 5000
+    quantile:
+        - 0.9
+    minvaf:
+        - 0.008
+
 log_dir: "logs"
 
 patient:

@@ -6,35 +6,14 @@ library(jcolors)
 library(ggforce)
 library(Hmisc)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Generate Final Figures")
-parser$add_argument('--figure', type='character',
-                    help="Outpute figure files")
-parser$add_argument('--suppfigures', type='character',
-                    help="Outpute figure files", nargs = "+")
-parser$add_argument('--oesophagusfitmissense', type='character',
-                    help="Fits for missense mutations oesophagus")
-parser$add_argument('--oesophagusfitnonsense', type='character',
-                    help="Fits for nonsense mutations oesophagus")
-parser$add_argument('--oesophagusfitmissensepergene', type='character',
-                    help="Fits for missense mutations oesophagus per gene")
-parser$add_argument('--oesophagusfitnonsensepergene', type='character',
-                    help="Fits for nonsense mutations oesophagus per gene")
-parser$add_argument('--mutationcutoff', type='double',
-                    help="Only plot genes with at least this number of mutations")
-parser$add_argument('--rsqcutoff', type='double',
-                    help="Only plot genes with an rsq fit greater than this")
-args <- parser$parse_args()
-
 message("Generating Figure 3...")
 message("\t Reading in data...")
 
-dfnon <- read_csv(args$oesophagusfitnonsense, col_types = cols())
-dfmiss <- read_csv(args$oesophagusfitmissense, col_types = cols())
+dfnon <- read_csv(snakemake@input$oesophagusfitnonsense, col_types = cols())
+dfmiss <- read_csv(snakemake@input$oesophagusfitmissense, col_types = cols())
 
-dfnon.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
-dfmiss.gene <- read_csv(args$oesophagusfitmissensepergene, col_types = cols())
+dfnon.gene <- read_csv(snakemake@input$oesophagusfitnonsensepergene, col_types = cols())
+dfmiss.gene <- read_csv(snakemake@input$oesophagusfitmissensepergene, col_types = cols())
 
 message("Combine data frames...")
 dfcombined <- bind_rows(mutate(dfmiss.gene, mutationtype = "Missense"),
@@ -45,7 +24,7 @@ library(ggforce)
 DFresults <- dfcombined %>%
     group_by(gene, mutationtype, deltafit, nmutations, deltafitlq, deltafituq) %>%
     summarise(rsq = first(rsq)) %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n()) %>% filter(n > 1)
 
 message("Summarise per gene values...")
@@ -84,7 +63,7 @@ message("Plot DFE...")
 DFresults <- dfcombined %>%
     group_by(gene, mutationtype, deltafit, nmutations, deltafitlq, deltafituq) %>%
     summarise(rsq = first(rsq)) %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n())
 
 DFEmiss <- DFresults %>%
@@ -117,7 +96,7 @@ DFEnon <- DFresults %>%
 DFE <- plot_grid(DFEmiss, DFEnon, labels = c("c", "d"))
 message("Combine figures and save plot...")
 figure3 <- plot_grid(geneplot, DFE, ncol = 1)
-save_plot(args$figure, figure3, base_height = 7, base_width = 10)
+save_plot(snakemake@output$figure, figure3, base_height = 7, base_width = 10)
 
 
 message("Summary of per gene values...")
@@ -202,7 +181,7 @@ gnon <- dfnon %>%
 
 g <- plot_grid(gmiss, gnon, ncol = 2, labels = c("a", "b"))
 
-save_plot(args$suppfigures[1], g, base_height = 8, base_width = 16)
+save_plot(snakemake@output$suppfigures[1], g, base_height = 8, base_width = 16)
 
 
 message("summarise per patient global delta values")
@@ -226,7 +205,7 @@ missenseperpatient <- dfmiss %>%
     distinct(patient, Age, Age2, deltafit, deltafitlq, deltafituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > args$rsqcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = deltafit)) +
     geom_bar(stat = "identity", fill = "darkolivegreen", width = 0.5) +
     geom_text(aes(label = barlab), y = 0.008, parse = T) +
@@ -244,7 +223,7 @@ nonsenseperpatient <- dfnon %>%
     distinct(patient, Age, Age2, lambdarfit, lambdarfitlq, lambdarfituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > args$rsqcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = lambdarfit)) +
     geom_bar(stat = "identity", fill = "darkslategrey", width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq)) +
@@ -259,7 +238,7 @@ missenseperpatient <- dfmiss %>%
     distinct(patient, Age, Age2, lambdarfit, lambdarfitlq, lambdarfituq, rsq) %>%
     mutate(xlab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
-    filter(rsq > args$rsqcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff) %>%
     ggplot(aes(x = fct_reorder(xlab, Age2), y = lambdarfit)) +
     geom_bar(stat = "identity", fill = "darkolivegreen", width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq)) +
@@ -274,20 +253,20 @@ patientplot2 <- plot_grid(missenseperpatient, nonsenseperpatient, align = T, lab
 
 finalplot <- plot_grid(patientplot, patientplot2, ncol = 1)
 
-save_plot(args$suppfigures[2], finalplot, base_height = 7, base_width = 10)
+save_plot(snakemake@output$suppfigures[2], finalplot, base_height = 7, base_width = 10)
 
 
 message("plot all per patient per gene fits")
 message("\tCreating text annotations")
 textdf <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Missense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
 message("\tCreating plots")
 gmiss <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Missense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "plum4") +
@@ -298,13 +277,13 @@ gmiss <- dfcombined %>%
     geom_text(data = textdf, aes(label = label, y = y), x = 3.0, size = 5, parse = TRUE)
 
 textdf <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Nonsense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Nonsense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
 gnon <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Nonsense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Nonsense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "darkseagreen4") +
@@ -316,7 +295,7 @@ gnon <- dfcombined %>%
 
 g <- plot_grid(gnon, gmiss, ncol = 1)
 
-save_plot(args$suppfigures[3], g, base_height = 24, base_width = 12)
+save_plot(snakemake@params$suppfigures[3], g, base_height = 24, base_width = 12)
 
 message("Delta and lambda summary")
 
@@ -326,7 +305,7 @@ glambda <- dfcombined %>%
     mutate(plab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
     mutate(plab = fct_reorder(plab, Age2)) %>%
-    filter(rsq > args$rsqcutoff, lambdarfit < 40.0, nmutations > args$mutationcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff, lambdarfit < 40.0, nmutations > snakemake@params$mutationcutoff) %>%
     ggplot(aes(x = gene, y = lambdarfit, fill = mutationtype, group = mutationtype)) +
     geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single"), width = 0.5) +
     geom_linerange(aes(ymin = lambdarfitlq, ymax = lambdarfituq),
@@ -345,7 +324,7 @@ gdelta <- dfcombined %>%
     mutate(plab = paste0(patient, " (", Age, ")"),
           barlab = paste0("R^{2}==",round(rsq, 3))) %>%
     mutate(plab = fct_reorder(plab, Age2)) %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff) %>%
     ggplot(aes(x = gene, y = deltafit, fill = mutationtype)) +
     geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = "single"), width = 0.5) +
     geom_linerange(aes(ymin = deltafitlq, ymax = deltafituq),
@@ -358,4 +337,4 @@ gdelta <- dfcombined %>%
     theme(legend.title = element_blank()) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-save_plot(args$suppfigures[4], plot_grid(glambda, gdelta, ncol = 2), base_height = 10, base_width = 20)
+save_plot(snakemake@output$suppfigures[4], plot_grid(glambda, gdelta, ncol = 2), base_height = 10, base_width = 20)

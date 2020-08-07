@@ -7,41 +7,15 @@ library(bayesplot)
 library(modelr)
 library(cowplot)
 
-parser <- ArgumentParser(description = "Plot simulation fits output")
-parser$add_argument('--datafits', type='character',
-                    help="Data fits")
-parser$add_argument('--datamodelfits', type='character',
-                    help="Data model fits")
-parser$add_argument('--figure', type='character',
-                    help="Output figure files")
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Mutations and VAF for oesophagus data")
-parser$add_argument('--oesophagusmetadata', type='character',
-                    help=" oesophagus meta data")
-parser$add_argument('--suppfigures', type='character',
-                    help="Output figure files", nargs = "+")
-parser$add_argument('--rho', type='double',
-                    help="Progenitor density", default = 5000.0)
-parser$add_argument('--binsize', type='double',
-                    help="Binsize for fitting", default = 0.002)
-args <- parser$parse_args()
-
- # args <- list(datafits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit.Rdata",
- #              datamodelfits = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/results/dataforfigures/data-clonesizefit-models.Rdata",
- #              oesophaagusdata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/esophagus.csv",
- #              oesophaagusmetadata = "~/Documents/apocrita/BCInew/marc/dnds/dnds-clonesize/data/oesophagus/patient_info.xlsx",
- #              rho = 5000,
- #              binsize = 0.002)
-
 message("Read in data")
 
-df <- read_csv(args$oesophagusdata)
-donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+df <- read_csv(snakemake@input$oesophagusdata)
+donor <- readxl::read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(donor = PD)
 df <- left_join(df, donor)
 
-fits <- readRDS(args$datafits)
-modelfits <- readRDS(args$datamodelfits)
+fits <- readRDS(snakemake@input$fits)
+modelfits <- readRDS(snakemake@input$modelfits)
 
 binsize <- fits$age$data$n[2] - fits$age$data$n[1]
 totalarea <- mean(unique(df$Nsamples)) * 2
@@ -263,7 +237,7 @@ gleft <-plot_grid(plot_grid(gdotplot, labels = c("a")),
                             labels = c("b", "c", "d"), ncol = 3, rel_widths = c(0.7, 1, 1)), ncol = 1, align = "h")
 gall <- plot_grid(gleft, gfitsage, labels = c("", "e"), rel_widths = c(1.0, 0.7))
 
-save_plot(filename = args$figure, gall, base_height = 8, base_width = 18)
+save_plot(filename = snakemake@output$figure, gall, base_height = 8, base_width = 18)
 
 
 #########################################
@@ -326,7 +300,7 @@ for (mygene in c("NOTCH1", "TP53")){
 gleft <- plot_grid(plotlist = plotlist, ncol = 1)
 gall <- plot_grid(gleft, genes, ncol = 2, labels = c("a", "b"), rel_widths = c(1, 0.6))
 
-save_plot(args$suppfigure[1], gall, base_height = 10, base_width = 15)
+save_plot(snakemake@output$suppfigures[1], gall, base_height = 10, base_width = 15)
 
 
 

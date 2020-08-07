@@ -12,8 +12,8 @@ parser$add_argument('--beta', type='character',
                     help="Binsize for fitting")
 args <- parser$parse_args()
 
-exp <- read_csv(args$exp)
-beta <- read_csv(args$beta)
+exp <- read_csv(snakemake@input$exp)
+beta <- read_csv(snakemake@input$beta)
 
 
 g1 <- exp %>%
@@ -76,7 +76,7 @@ g4 <- beta %>%
 
 
 g <- plot_grid(g1, g2, g2a, ncol = 3)
-save_plot(args$suppfigure, g, base_width = 13, base_height = 4)
+save_plot(snakemake@output$suppfigure, g, base_width = 13, base_height = 4)
 
 exp %>%
   filter(rsq > 0.6, deltafit > 0.0) %>%

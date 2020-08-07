@@ -7,17 +7,7 @@ library(forcats)
 library(ggforce)
 library(Hmisc)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Generate Final Figures")
-parser$add_argument('--figure', type='character',
-                    help="Output figure files", default = NULL)
-parser$add_argument('--suppfigures', type='character',
-                    help="Outpute figure files", nargs = "+", default = NULL)
-parser$add_argument('--binsizesims', type='character',
-                    help="Bin size simulations")
-args <- parser$parse_args()
-dfsim <- read_csv(args$binsizesims) %>%
+dfsim <- read_csv(snakemake@input$binsizesims) %>%
   filter(stepsize < 0.1)
 
 del <- 0.4
@@ -62,4 +52,4 @@ gsim <- dfsim %>%
 
 
 gout <- plot_grid(gsim, gsummary, labels = c("a", "b"))
-save_plot(args$suppfigures[1], gout, base_height = 5, base_width = 13)
+save_plot(snakemake@output$suppfigures[1], gout, base_height = 5, base_width = 13)

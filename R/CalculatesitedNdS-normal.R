@@ -4,42 +4,22 @@ library(cowplot)
 library(dndscv)
 library(GenomicRanges)
 library(readr)
-library(argparse)
 
-parser <- ArgumentParser(description = "Calculate dN/dS normal")
-parser$add_argument('--patientinfo', type='character',
-                    help="Patient info xlsx file")
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Oesophagus clone size data")
-parser$add_argument('--hotspots', type='character',
-                    help="Hotspot data")
-parser$add_argument('--oesophagusdnds', type='character',
-                    help="Oesophagus dnds")
-parser$add_argument('--oesophagusdndsgenes', type='character',
-                    help="Oesophagus dnds for neutral genes")
-parser$add_argument('--step', type = 'double',
-                    help="stepsize for interval dN/dS")
-parser$add_argument('--minarea', type = 'double',
-                    help="Min area for interval dN/dS")
-parser$add_argument('--maxarea', type = 'double',
-                    help="Min area for interval dN/dS")
-args <- parser$parse_args()
-
-args$step <- 1 * args$step
-args$minarea <- 3 * args$minarea
+snakemake@params$step <- 1 * snakemake@params$step
+snakemake@params$minarea <- 3 * snakemake@params$minarea
 
 message("Read in meta data for the oesophagus")
-dfdonor <- read_xlsx(args$patientinfo, skip = 1) %>%
+dfdonor <- read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(patient = PD)
 
 message("Read in mutation data for the oesophagus")
-df <- read_csv(args$oesophagusdata) %>%
+df <- read_csv(snakemake@input$oesophagusdata) %>%
   mutate(sumvaf = sumvaf * 2)
 
 message("Create vector of intervals for i-dN/dS")
-minarea <- args$minarea
-maxarea <- args$maxarea
-step <- args$step
+minarea <- snakemake@params$minarea
+maxarea <- snakemake@params$maxarea
+step <- snakemake@params$step
 areacutoff <- seq(minarea, maxarea, step)
 
 message("Find unique genes")
@@ -89,6 +69,6 @@ for (p in rev(unique(df$donor))){
 }
 
 message("Write output to file")
-write_csv(dfdnds.patient, args$oesophagusdnds)
-write_csv(dfdnds.genes.patient, args$oesophagusdndsgenes)
-write_csv(df.hotspots, args$hotspots)
+write_csv(dfdnds.patient, snakemake@output$oesophagusdnds)
+write_csv(dfdnds.genes.patient, snakemake@output$oesophagusdndsgenes)
+write_csv(df.hotspots, snakemake@output$hotspots)

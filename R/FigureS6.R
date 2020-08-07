@@ -7,36 +7,14 @@ library(forcats)
 library(ggforce)
 library(Hmisc)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Generate Final Figures")
-parser$add_argument('--figure', type='character',
-                    help="Outpute figure files")
-parser$add_argument('--suppfigures', type='character',
-                    help="Outpute figure files", nargs = "+")
-parser$add_argument('--skinfitmissense', type='character',
-                    help="Fits for missense mutations oesophagus")
-parser$add_argument('--skinfitnonsense', type='character',
-                    help="Fits for nonsense mutations oesophagus")
-parser$add_argument('--skinfitmissensepergene', type='character',
-                    help="Fits for missense mutations oesophagus per gene")
-parser$add_argument('--skinfitnonsensepergene', type='character',
-                    help="Fits for nonsense mutations oesophagus per gene")
-parser$add_argument('--mutationcutoff', type='double',
-                    help="Only plot genes with at least this number of mutations")
-parser$add_argument('--rsqcutoff', type='double',
-                    help="Only plot genes with an rsq fit greater than this")
-args <- parser$parse_args()
-print(args)
-
 message("Generating Figure 3...")
 message("\t Reading in data...")
 
-dfnon <- read_csv(args$skinfitnonsense, col_types = cols())
-dfmiss <- read_csv(args$skinfitmissense, col_types = cols())
+dfnon <- read_csv(snakemake@input$skinfitnonsense, col_types = cols())
+dfmiss <- read_csv(snakemake@input$skinfitmissense, col_types = cols())
 
-dfnon.gene <- read_csv(args$skinfitnonsensepergene, col_types = cols())
-dfmiss.gene <- read_csv(args$skinfitmissensepergene, col_types = cols())
+dfnon.gene <- read_csv(snakemake@input$skinfitnonsensepergene, col_types = cols())
+dfmiss.gene <- read_csv(snakemake@input$skinfitmissensepergene, col_types = cols())
 
 message("Make plots...")
 
@@ -142,7 +120,7 @@ DFresults <- dfcombined %>%
 print(DFresults)
 
 DFresults <- DFresults %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff) %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff) %>%
     group_by(gene, mutationtype) %>% mutate(n = n())
 
 message("Plot DFE...")
@@ -162,21 +140,21 @@ DFEmiss <- DFresults %>%
 
 g <- plot_grid(g1, g2, g3, g4, g5, DFEmiss, ncol = 3, labels = c("a", "b", "c", "d", "e", "f"))
 
-save_plot(args$figure, g, base_height = 7, base_width = 10)
+save_plot(snakemake@output$figure, g, base_height = 7, base_width = 10)
 
 
 message("Plot all fits...")
 
 
 textdf <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Missense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
 print(textdf)
 gmiss <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > args$mutationcutoff, mutationtype == "Missense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > snakemake@params$mutationcutoff, mutationtype == "Missense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "plum4") +
@@ -189,14 +167,14 @@ gmiss <- dfcombined %>%
 #save_plot("FinalFigures/Figure3SX.pdf", g3, base_height = 12, base_width = 12)
 
 textdf <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
     mutate(label = paste("list(Delta[fit] == ", round(deltafit, 3), ",R^{2}==",round(rsq, 3) ,")"),
           y1 = min(dnds), y2 = min(dndsfit),
           y = floor(min(y1, y2)) + 1) %>%
     distinct(y, deltafit, label)
 print(textdf)
 gnon <- dfcombined %>%
-    filter(rsq > args$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
+    filter(rsq > snakemake@params$rsqcutoff, nmutations > 4, mutationtype == "Nonsense") %>%
     ggplot(aes(x = A, y = dnds)) +
     geom_point(alpha = 0.9, size = 1) +
     geom_line(aes(y = dndsfit), alpha = 0.5, size = 1.0, col = "darkseagreen4") +
@@ -208,4 +186,4 @@ gnon <- dfcombined %>%
 
 g <- plot_grid(gnon, gmiss, ncol = 1)
 
-save_plot(args$suppfigures[1], g, base_height = 24, base_width = 12)
+save_plot(snakemake@output$suppfigures[1], g, base_height = 24, base_width = 12)

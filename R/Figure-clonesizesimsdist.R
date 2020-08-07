@@ -7,34 +7,13 @@ library(bayesplot)
 library(modelr)
 library(cowplot)
 
-parser <- ArgumentParser(description = "Plot simulation fits output")
-parser$add_argument('--simulationdata', type='character',
-                    help="Simulation data for clone sizes")
-parser$add_argument('--simulationfits', type='character',
-                    help="Simulation fits")
-parser$add_argument('--suppfigures', type='character',
-                    help="Output figure files", nargs = "+")
-parser$add_argument('--rho', type='double',
-                    help="Progenitor density", default = 5000.0)
-parser$add_argument('--binsize', type='double',
-                    help="Binsize for fitting", default = 0.002)
-parser$add_argument('--delta', type='double',
-                    help="Delta value to use for plots", default = 0.1)
-args <- parser$parse_args()
-
-
-# args <- list(simulationdata = "~/Documents/mounts/apocrita/marc/dnds/dnds-clonesize/results/simulations/clonesize_overtime-dist.csv",
-#             simulationfits = "~/Documents/mounts/apocrita/marc/dnds/dnds-clonesize/results/dataforfigures/simulation-clonesizefit-dist.Rdata",
-#             rho = 5000,
-#             delta = 0.05,
-#             binsize = 0.002)
 
 message("Read in data")
-sims <- read_csv(args$simulationdata, guess_max = 10^5) %>%
+sims <- read_csv(snakemake@input$simulationdata, guess_max = 10^5) %>%
   mutate(condition = factor(group_indices(., gene))) %>%
-  mutate(A = f / args$rho)
+  mutate(A = f / snakemake@config$params$rho)
 
-fits <- readRDS(args$simulationfits)
+fits <- readRDS(snakemake@input$simulationfits)
 fit <- fits$fit
 
 message("Transform data")
@@ -63,7 +42,7 @@ midcut<-function(x,from,to,by){
 
 
 mydat <- sims %>%
-  mutate(fidx = midcut(A, args$binsize, 1, args$binsize)) %>%
+  mutate(fidx = midcut(A, snakemake@config$params$binsize, 1, snakemake@config$params$binsize)) %>%
   filter(!is.na(fidx)) %>%
   group_by(condition) %>%
   mutate(maxA = max(A)) %>%
@@ -74,11 +53,11 @@ mydat <- sims %>%
   complete(gene, nesting(n), fill = list(C = 0)) %>%
   fill(delta, deltasample, rlam, t, Nsims, mu,N0, condition, .direction = "down") %>%
   mutate(C = C) %>%
-  mutate(A = mu * N0 * Nsims * (args$binsize),
+  mutate(A = mu * N0 * Nsims * (snakemake@config$params$binsize),
          B = ifelse(delta == 0,
                     Nt0(rlam = rlam, delta = deltasample, t = t),
                     Nt(rlam = rlam, delta = deltasample, t = t)),
-         B = B / args$rho,
+         B = B / snakemake@config$params$rho,
          logB = log(B)) %>%
   #mutate(n = n) %>%
   mutate(Ctheory = (A / n) * (1 / (1 + deltasample)) * exp(-n / B)) %>%
@@ -100,7 +79,7 @@ Nsims <- params$Nsims[1]
 val <- params %>%
   summarise(x = mean(mu) * mean(Nsims) * mean(N0)) %>%
   pull(x)
-val <- val * args$binsize
+val <- val * snakemake@config$params$binsize
 
 infval <- fit %>%
   spread_draws(b_A_Intercept) %>%
@@ -174,14 +153,14 @@ gA <- fit %>%
   spread_draws(r_gene__A[condition,], b_A_Intercept, sd_gene__A_Intercept) %>%
   mutate(condmean = r_gene__A + b_A_Intercept) %>%
   left_join(params) %>%
-  mutate(condmean = condmean / (Nsims * (args$binsize))) %>%
+  mutate(condmean = condmean / (Nsims * (snakemake@config$params$binsize))) %>%
   mutate(yax = paste0(mu)) %>%
   ggplot(aes(y = yaxmu)) +
   scale_color_brewer() +
   stat_pointintervalh(aes(x = condmean), alpha = 0.7,
                       .width = c(.66, .95), position = position_nudge(y = 0.0)) +
   # data
-  geom_point(aes(x = A / (Nsims * (args$binsize))), data = params, col = "firebrick", fill = "white", shape = 21, size = 2) +
+  geom_point(aes(x = A / (Nsims * (snakemake@config$params$binsize))), data = params, col = "firebrick", fill = "white", shape = 21, size = 2) +
   xlab(~n[0]~mu/~rho) +
   coord_flip() +
   theme_cowplot() +
@@ -214,7 +193,7 @@ gB <- fit %>%
 
 
 g <- plot_grid(g2, gB, ncol = 2, labels = c("a", "b"))
-save_plot(args$suppfigures[1], g, base_height = 4, base_width = 9)
+save_plot(snakemake@output$suppfigures[1], g, base_height = 4, base_width = 9)
 
 
 

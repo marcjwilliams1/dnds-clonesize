@@ -6,34 +6,17 @@ library(bayesplot)
 library(modelr)
 library(cowplot)
 
-parser <- ArgumentParser(description = "Plot simulation fits output")
-parser$add_argument('--simulationdata', type='character',
-                    help="Simulation data for hitchikers")
-parser$add_argument('--suppfigures', type='character',
-                    help="Output figure files", nargs = "+")
-parser$add_argument('--rho', type='double',
-                    help="Progenitor density", default = 5000.0)
-parser$add_argument('--binsize', type='double',
-                    help="Binsize for fitting", default = 0.002)
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Mutations and VAF for oesophagus data")
-parser$add_argument('--oesophagusdata_all', type='character',
-                    help="Mutations and VAF for oesophagus data including sample info")
-parser$add_argument('--oesophagusmetadata', type='character',
-                    help=" oesophagus meta data")
-args <- parser$parse_args()
+dfsims <- read_csv(snakemake@input$simulationdata)
 
-dfsims <- read_csv(args$simulationdata)
-
-dfdata <- read_csv(args$oesophagusdata)
-donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+dfdata <- read_csv(snakemake@input$oesophagusdata)
+donor <- readxl::read_xlsx(snakemake@input$oesophagusmetadata, skip = 1) %>%
   dplyr::rename(donor = PD)
 dfdata <- left_join(dfdata, donor)
 
 # Plot data per patch
 message("Read in data from xlsx file")
 
-dfall <- readxl::read_xlsx(args$oesophagusdata_all, sheet = 1, skip = 16)
+dfall <- readxl::read_xlsx(snakemake@input$oesophagusdata_all, sheet = 1, skip = 16)
 
 dfallcounts <- dfall %>%
   mutate(muttype = case_when(
@@ -102,7 +85,7 @@ patch <- full_join(nmuts, vafmuts, by = "sampleID", suffix = c("_n", "_vaf"))
 gall <- plot_grid(g1, g2, g3, g4, ncol = 2, align = "hv", labels = c("a", "b", "c", "d"))
 
 message("Save figure")
-save_plot(args$suppfigures[1], gall, base_height = 8, base_width = 20)
+save_plot(snakemake@output$suppfigures[1], gall, base_height = 8, base_width = 20)
 
 mylm <- lm(Synonymous_n ~ NOTCH1_n, patch)
 print(summary(mylm))

@@ -5,15 +5,8 @@ rule brms:
     output:
         "results/dataforfigures/brmsfit.Rdata"
     threads: 4
-    shell:
-        """
-        module load R/3.5.3
-        module load gcc
-        Rscript R/fitbrms.R \
-            --oesophagusdata {input.oesophagusdata} \
-            --oesophagusmetadata {input.oesophaguspatientinfo} \
-            --output {output}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/fitbrms.R"
 
 rule brmssites:
     input:
@@ -23,22 +16,8 @@ rule brmssites:
         fits = "results/dataforfigures/brmsfit-sites.Rdata",
         coefficients = "results/dataforfigures/brmsfit-sites-coef.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        #module load gcc
-        #module load R/3.5.3
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitbrms-sites.R \
-            --oesophagusdata {input.oesophagusdata} \
-            --oesophagusmetadata {input.oesophaguspatientinfo} \
-            --output {output.fits} \
-            --outputcoef {output.coefficients} \
-            --threads {threads}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/fitbrms-sites.R"
 
 rule clonesizesims:
     input:
@@ -47,14 +26,10 @@ rule clonesizesims:
     output:
         "results/dataforfigures/simulation-clonesizefit.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-sims.R \
+        Rscript R/fitclonesize-sims.R \
             --simulationdata {input.data} \
             --simulationdatahitchike {input.datahitchike} \
             --output {output} \
@@ -68,14 +43,10 @@ rule clonesizesimsdist:
     output:
         "results/dataforfigures/simulation-clonesizefit-dist.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-sims.R \
+        Rscript R/fitclonesize-sims.R \
             --simulationdata {input.data} \
             --simulationdatahitchike {input.datahitchike} \
             --output {output} \
@@ -89,19 +60,8 @@ rule clonesizedata:
     output:
         "results/dataforfigures/data-clonesizefit.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-data.R \
-            --oesophagusdata {input.oesophagusdata} \
-            --oesophagusmetadata {input.oesophaguspatientinfo} \
-            --output {output} \
-            --threads {threads}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/fitclonesize-data.R"
 
 rule clonesizedatacompare:
     input:
@@ -110,16 +70,5 @@ rule clonesizedatacompare:
     output:
         "results/dataforfigures/data-clonesizefit-models.Rdata"
     threads: 4
-    params:
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-            Rscript R/fitclonesize-data-compare.R \
-            --oesophagusdata {input.oesophagusdata} \
-            --oesophagusmetadata {input.oesophaguspatientinfo} \
-            --output {output} \
-            --threads {threads}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/fitclonesize-data-compare.R"

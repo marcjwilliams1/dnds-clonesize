@@ -6,21 +6,9 @@ theme_set(theme_cowplot())
 library(jcolors)
 library(brms)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Fit brms models")
-parser$add_argument('--oesophagusdata', type='character',
-                    help="Mutations and VAF for oesophagus data")
-parser$add_argument('--oesophagusmetadata', type='character',
-                    help=" oesophagus meta data")
-parser$add_argument('--output', type='character',
-                    help=" oesophagus meta data")
-args <- parser$parse_args()
-
-
 message("Read in data")
-df <- read_csv(args$oesophagusdata)
-donor <- readxl::read_xlsx(args$oesophagusmetadata, skip = 1) %>%
+df <- read_csv(snakemake@input$oesophagusdata)
+donor <- readxl::read_xlsx(snakemake@input$oesophaguspatientinfo, skip = 1) %>%
   dplyr::rename(donor = PD)
 df <- left_join(df, donor)
 
@@ -114,7 +102,7 @@ out <- list(normal = brms_normal,
             model_comparison_loo = loo_compare_loo,
             model_comparison_waic = loo_compare_waic)
 
-saveRDS(out, args$output)
+saveRDS(out, snakemake@$output[[1]])
 
 
 #library(lme4)

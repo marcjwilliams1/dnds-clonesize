@@ -1,72 +1,21 @@
-println("Hello")
-using Pkg
-#Pkg.build("RCall")
 using CSV
 using DataFrames
-using ArgParse
 using RCall
 
 @rimport readr as readr
 
-println("Hello")
-
 # load functions to fit data via least squares
-include("optim.jl")
-
-#parse arguments
-s = ArgParseSettings()
-@add_arg_table s begin
-    "--oesophagusdndsdata"
-        help = "Oesophagus dnds values"
-    "--oesophagusdndsdatagenes"
-        help = "Oesophagus dnds values per gene"
-    "--oesophagusdndsneutral"
-        help = "Oesophagus dnds values"
-    "--oesophagusmetadata"
-        help = "Information on patient ages etc"
-    "--skindndsdata"
-        help = "Oesophagus dnds values"
-    "--skindndsdatagenes"
-        help = "Oesophagus dnds values per gene"
-    "--skinmetadata"
-        help = "Information on patient ages etc"
-    "--oesophagusfitmissense"
-        help = "Fits for oesophagus missense mutations"
-    "--oesophagusfitall"
-        help = "Fits for oesophagus all mutations"
-    "--oesophagusfitnonsense"
-        help = "Fits for oesophagus nonsense mutations"
-    "--oesophagusfitmissensepergene"
-        help = "Fits for oesophagus missense mutations per gene"
-    "--oesophagusfitnonsensepergene"
-        help = "Fits for oesophagus nonsense mutations per gene"
-    "--skinfitmissense"
-        help = "Fits for oesophagus missense mutations"
-    "--skinfitnonsense"
-        help = "Fits for skin nonsense mutations"
-    "--skinfitmissensepergene"
-        help = "Fits for oesophagus missense mutations per gene"
-    "--skinfitnonsensepergene"
-        help = "Fits for skin nonsense mutations per gene"
-    "--oesophagusfitneutral"
-        help = "Fits for oesophagus neutral genes"
-end
-
-parsed_args = parse_args(ARGS, s)
-println(parsed_args)
+println(snakemake)
+include(string(snakemake.scriptdir, "/optim.jl"))
 
 println("Read in data...")
-println(parsed_args["oesophagusmetadata"])
-# DFdonor = CSV.read(parsed_args["oesophagusmetadata"]);
-# DFcohort = CSV.read(parsed_args["oesophagusdndsdata"]);
-
-DFdonor = rcopy(readr.read_csv(parsed_args["oesophagusmetadata"]))
-DFcohort = rcopy(readr.read_csv(parsed_args["oesophagusdndsdata"]))
+println(snakemake.input["oesophagusmetadata"])
+DFdonor = rcopy(readr.read_csv(snakemake.input["oesophagusmetadata"]))
+DFcohort = rcopy(readr.read_csv(snakemake.input["oesophagusdnds"]))
 DFcohort[:A] = 2 * DFcohort[:areacutoff];
 
 println("Reading in per gene data...")
-#DF = CSV.File(parsed_args["oesophagusdndsdatagenes"]) |> DataFrame
-DF = rcopy(readr.read_csv(parsed_args["oesophagusdndsdatagenes"]))
+DF = rcopy(readr.read_csv(snakemake.input["oesophagusdndsgenes"]))
 DF[:A] = 2 .* DF[:areacutoff];
 println("Data read in")
 
@@ -149,14 +98,13 @@ println("Writing data to file....")
 @rput myDFall
 R"""
 library(readr)
-write_csv(myDFmiss, $(parsed_args["oesophagusfitmissense"]))
-write_csv(myDFnon, $(parsed_args["oesophagusfitnonsense"]))
-write_csv(myDFall, $(parsed_args["oesophagusfitall"]))
+write_csv(myDFmiss, $(snakemake.output["oesophagusfitmissense"]))
+write_csv(myDFnon, $(snakemake.output["oesophagusfitnonsense"]))
+write_csv(myDFall, $(snakemake.output["oesophagusfitall"]))
 """;
 
 println("Reading in per gene data...")
-#DF = CSV.File(parsed_args["oesophagusdndsdatagenes"]) |> DataFrame
-DF = rcopy(readr.read_csv(parsed_args["oesophagusdndsdatagenes"]))
+DF = rcopy(readr.read_csv(snakemake.input["oesophagusdndsgenes"]))
 DF[:A] = 2 .* DF[:areacutoff];
 
 
@@ -185,6 +133,10 @@ for gene in unique(DF[:gene_name])
     println("Analysing gene: $gene")
     DFgene = filter(row -> row[:gene_name] == gene, DF);
     println("Analysing missense mutations")
+    if gene == "SPHKAP"
+        println("Errors with this gene, moving to next patient")
+        continue
+    end
     for p in DFdonor[:patient]
         DFpatient = filter(row -> row[:patient] == p, DFgene);
         age = filter(row -> row[:patient] == p, DFdonor)[:Age2][1]
@@ -196,7 +148,12 @@ for gene in unique(DF[:gene_name])
         end
         println("Analysing patient $p, $(nmuts) mutations")
 
-        x = LLoptimizationresults(DFpatient[:wmis_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        try 
+            global x = LLoptimizationresults(DFpatient[:wmis_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        catch e
+            println("Patient $p failed, moving to next patient")
+            continue
+        end
         x.DF[:patient] = p
         x.DF[:Age] = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
         x.DF[:Age2] = age
@@ -223,7 +180,14 @@ for gene in unique(DF[:gene_name])
             continue
         end
 
-        x = LLoptimizationresults(DFpatient[:wnon_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        println("Analysing patient $p, $(nmuts) mutations")
+
+        try
+            global x = LLoptimizationresults(DFpatient[:wnon_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        catch e
+            println("Patient $p failed, moving to next patient")
+            continue
+        end
         x.DF[:patient] = p
         x.DF[:Age] = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
         x.DF[:Age2] = age
@@ -246,12 +210,12 @@ println("Number of fits nonsense: $(length(unique(myDFnon[:gene])))")
 @rput myDFnon
 R"""
 library(readr)
-write_csv(myDFmiss, $(parsed_args["oesophagusfitmissensepergene"]))
-write_csv(myDFnon, $(parsed_args["oesophagusfitnonsensepergene"]))
+write_csv(myDFmiss, $(snakemake.output["oesophagusfitmissensepergene"]))
+write_csv(myDFnon, $(snakemake.output["oesophagusfitnonsensepergene"]))
 """;
 
 #DF = CSV.File(args["oesophagusdndsneutral"]) |> DataFrame
-DF = rcopy(readr.read_csv((parsed_args["oesophagusdndsneutral"])))
+DF = rcopy(readr.read_csv((snakemake.input["oesophagusdndsneutral"])))
 DF[:A] = 2 * DF[:areacutoff];
 
 DFpatient = filter(row -> row[:name] == "wall", DF)
@@ -261,18 +225,16 @@ x = LLoptimizationresults(DFpatient[:mle], DFpatient[:A]; t = 70.0, Amin = 0.14,
 allmutations = x.DF
 @rput allmutations
 R"""
-write_csv(allmutations, $(parsed_args["oesophagusfitneutral"]))
+write_csv(allmutations, $(snakemake.output["oesophagusfitneutral"]))
 """;
 
 
 #########################################################
 # Skin data
 #########################################################
-
-# DFdonor = CSV.read(parsed_args["skinmetadata"]);
-# DFcohort = CSV.read(parsed_args["skindndsdata"]);
-DFdonor = rcopy(readr.read_csv(parsed_args["skinmetadata"]));
-DFcohort = rcopy(readr.read_csv(parsed_args["skindndsdata"]));
+println("Analysing Skin data")
+DFdonor = rcopy(readr.read_csv(snakemake.input["skinmetadata"]));
+DFcohort = rcopy(readr.read_csv(snakemake.input["skindnds"]));
 DFcohort[:A] = DFcohort[:areacutoff];
 patient = unique(DFcohort[:patient])
 
@@ -346,13 +308,13 @@ end
 @rput myDFnon
 R"""
 library(readr)
-write_csv(myDFmiss, $(parsed_args["skinfitmissense"]))
-write_csv(myDFnon, $(parsed_args["skinfitnonsense"]))
+write_csv(myDFmiss, $(snakemake.output["skinfitmissense"]))
+write_csv(myDFnon, $(snakemake.output["skinfitnonsense"]))
 """;
 
 
 #DF = CSV.File("data/skin/dnds_patient_genes_combined.csv") |> DataFrame
-DF = rcopy(readr.read_csv(parsed_args["skindndsdatagenes"]))
+DF = rcopy(readr.read_csv(snakemake.input["skindndsgenes"], guess_max = 10^5))
 DF[:A] = DF[:areacutoff];
 
 delta = Float64[]
@@ -382,11 +344,29 @@ for gene in unique(DF[:gene_name])
         println("Skipping DICER1")
     end
 
+    if gene == "KCNH5"
+        continue
+        println("Skipping KCNH5")
+    end
+
     for p in DFdonor[:patient]
         println(p)
         DFpatient = filter(row -> row[:patient] == p, DFgene);
         age = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
-        x = LLoptimizationresults(DFpatient[:wmis_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+
+        nmuts = DFpatient[:n_syn][end] + DFpatient[:n_mis][end]
+        if nmuts < 5
+            println("Patient $p, only $(nmuts) mutations, moving to next patient")
+            continue
+        end
+        println("Analysing patient $p, $(nmuts) mutations")
+
+        try 
+            global x = LLoptimizationresults(DFpatient[:wmis_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        catch e
+            println("Patient $p failed, moving to next patient")
+            continue
+        end
         x.DF[:patient] = p
         x.DF[:Age] = age
         x.DF[:gene] = gene
@@ -405,8 +385,20 @@ for gene in unique(DF[:gene_name])
         println(p)
         DFpatient = filter(row -> row[:patient] == p, DFgene);
 
+        nmuts = DFpatient[:n_syn][end] + DFpatient[:n_mis][end]
+        if nmuts < 5
+            println("Patient $p, only $(nmuts) mutations, moving to next patient")
+            continue
+        end
+        println("Analysing patient $p, $(nmuts) mutations")
+
         age = filter(row -> row[:patient] == p, DFdonor)[:Age][1]
-        x = LLoptimizationresults(DFpatient[:wnon_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        try 
+            global x = LLoptimizationresults(DFpatient[:wnon_cv], DFpatient[:A]; t = age, Amin = 2 * 0.01, ρ = 5000.0)
+        catch e
+            println("Patient $p failed, moving to next patient")
+            continue
+        end
         x.DF[:patient] = p
         x.DF[:Age] = age
         x.DF[:gene] = gene
@@ -424,6 +416,6 @@ end
 @rput myDFmiss
 @rput myDFnon
 R"""
-write_csv(myDFmiss, $(parsed_args["skinfitmissensepergene"]))
-write_csv(myDFnon, $(parsed_args["skinfitnonsensepergene"]))
+write_csv(myDFmiss, $(snakemake.output["skinfitmissensepergene"]))
+write_csv(myDFnon, $(snakemake.output["skinfitnonsensepergene"]))
 """

@@ -18,31 +18,8 @@ rule fitdNdSnormal:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene.csv",
         skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral.csv"
-    shell:
-        """
-        module unload R
-        module load R/3.5.3
-        module load julia
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
-        julia julia/FitdNdS.jl \
-            --oesophagusdndsdata {input.oesophagusdnds} \
-            --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
-            --oesophagusdndsneutral {input.oesophagusdndsneutral} \
-            --oesophagusmetadata {input.oesophagusmetadata} \
-            --skindndsdata {input.skindnds} \
-            --skindndsdatagenes {input.skindndsgenes} \
-            --skinmetadata {input.skinmetadata} \
-            --oesophagusfitmissense {output.oesophagusfitmissense} \
-            --oesophagusfitall {output.oesophagusfitall} \
-            --oesophagusfitnonsense {output.oesophagusfitnonsense} \
-            --skinfitmissense {output.skinfitmissense} \
-            --skinfitnonsense {output.skinfitnonsense} \
-            --oesophagusfitmissensepergene {output.oesophagusfitmissensepergene} \
-            --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
-            --skinfitmissensepergene {output.skinfitmissensepergene} \
-            --skinfitnonsensepergene {output.skinfitnonsensepergene} \
-            --oesophagusfitneutral {output.oesophagusfitneutral}
-        """
+    singularity: "docker://marcjwilliams1/julia_r_dnds:v1.1"
+    script: "../julia/FitdNdS.jl"
 
 rule fitdNdSnormalSNV:
     input:
@@ -64,31 +41,8 @@ rule fitdNdSnormalSNV:
         skinfitmissensepergene = "results/dataforfigures/skinfitmissensepergene_snv.csv",
         skinfitnonsensepergene = "results/dataforfigures/skinfitnonsensepergene_snv.csv",
         oesophagusfitneutral = "results/dataforfigures/oesophagusneutral_snv.csv"
-    shell:
-        """
-        module unload R
-        module load R/3.5.3
-        module load julia
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
-        julia julia/FitdNdS.jl \
-            --oesophagusdndsdata {input.oesophagusdnds} \
-            --oesophagusdndsdatagenes {input.oesophagusdndsgenes} \
-            --oesophagusdndsneutral {input.oesophagusdndsneutral} \
-            --oesophagusmetadata {input.oesophagusmetadata} \
-            --skindndsdata {input.skindnds} \
-            --skindndsdatagenes {input.skindndsgenes} \
-            --skinmetadata {input.skinmetadata} \
-            --oesophagusfitmissense {output.oesophagusfitmissense} \
-            --oesophagusfitall {output.oesophagusfitall} \
-            --oesophagusfitnonsense {output.oesophagusfitnonsense} \
-            --skinfitmissense {output.skinfitmissense} \
-            --skinfitnonsense {output.skinfitnonsense} \
-            --oesophagusfitmissensepergene {output.oesophagusfitmissensepergene} \
-            --oesophagusfitnonsensepergene {output.oesophagusfitnonsensepergene} \
-            --skinfitmissensepergene {output.skinfitmissensepergene} \
-            --skinfitnonsensepergene {output.skinfitnonsensepergene} \
-            --oesophagusfitneutral {output.oesophagusfitneutral}
-        """
+    singularity: "docker://marcjwilliams1/julia_r_dnds:v1.1"
+    script: "../julia/FitdNdS.jl"
 
 rule formatresultsSSB:
     input:
@@ -104,9 +58,9 @@ rule formatresultsSSB:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
     shell:
         """
-        module load R
         Rscript R/formatSSB.R \
             --inputfile {input.all} \
             --outputfile {output.all} \
@@ -136,18 +90,7 @@ rule fitdNdSnormalSSB:
         missense = "results/oesophagus/SSBresults/SSBdnds_results_missense.csv",
         nonsense = "results/oesophagus/SSBresults/SSBdnds_results_nonsense.csv",
         oesophagusmetadata = "data/oesophagus/donorinfo.csv",
-    output:
+    output: 
         oesophagusfit = "results/dataforfigures/oesophagusfit-SSB.csv",
-    shell:
-        """
-        module unload R
-        module load R/3.5.3
-        module load julia
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
-        julia julia/FitdNdS-SSB.jl \
-            --oesophagusdndsdata {input.all} \
-            --oesophagusdndsdata_miss {input.missense} \
-            --oesophagusdndsdata_non {input.nonsense} \
-            --oesophagusmetadata {input.oesophagusmetadata} \
-            --oesophagusfit {output.oesophagusfit} \
-        """
+    singularity: "docker://marcjwilliams1/julia_r_dnds:v1.1"
+    script: "../julia/FitdNdS-SSB.jl"

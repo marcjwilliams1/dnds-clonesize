@@ -17,29 +17,8 @@ rule CalculatedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-        Rscript R/CalculatedNdS-normal.R \
-            --patientinfo {input.oesophaguspatientinfo} \
-            --oesophagusdata {input.oesophagusdata} \
-            --skindata {input.skindata} \
-            --oesophagusdnds {output.oesophagusdnds} \
-            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
-            --skindnds {output.skindnds} \
-            --skindndsgenes {output.skindndsgenes} \
-            --oesophagusdndsneutral {output.oesophagusdndsneutral} \
-            --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
-            --singlepatient {params.singlepatient} \
-            --singlepatientdnds {output.singlepatientdnds} \
-            --singlepatientdndsgenes {output.singlepatientdndsgenes} \
-            --step {params.step} \
-            --minarea {params.minarea} \
-            --maxarea {params.maxarea}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/CalculatedNdS-normal.R"
 
 rule CalculatedNdSNormalSNV:
     input:
@@ -60,29 +39,8 @@ rule CalculatedNdSNormalSNV:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-        Rscript R/CalculatedNdS-normal-snv.R \
-            --patientinfo {input.oesophaguspatientinfo} \
-            --oesophagusdata {input.oesophagusdata} \
-            --skindata {input.skindata} \
-            --oesophagusdnds {output.oesophagusdnds} \
-            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
-            --skindnds {output.skindnds} \
-            --skindndsgenes {output.skindndsgenes} \
-            --oesophagusdndsneutral {output.oesophagusdndsneutral} \
-            --oesophagusdndsgenesneutral {output.oesophagusdndsgenesneutral} \
-            --singlepatient {params.singlepatient} \
-            --singlepatientdnds {output.singlepatientdnds} \
-            --singlepatientdndsgenes {output.singlepatientdndsgenes} \
-            --step {params.step} \
-            --minarea {params.minarea} \
-            --maxarea {params.maxarea}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/CalculatedNdS-normal-snv.R"
 
 rule MakeFilesSSB:
     output:
@@ -95,20 +53,8 @@ rule MakeFilesSSB:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"]
-    shell:
-        """
-        module load R
-        module load gcc
-        module load julia
-        Rscript R/SSB-dNdS-files.R \
-            --patientinfo {input.oesophaguspatientinfo} \
-            --oesophagusdata {input.oesophagusdata} \
-            --outputdir {output} \
-            --sample {wildcards.oes_sample} \
-            --step {params.step} \
-            --minarea {params.minarea} \
-            --maxarea {params.maxarea}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/SSB-dNdS-files.R"
 
 rule CalculateSitedNdSNormal:
     input:
@@ -122,19 +68,5 @@ rule CalculateSitedNdSNormal:
         step=config["idndslimits"]["step"],
         minarea=config["idndslimits"]["minarea"],
         maxarea=config["idndslimits"]["maxarea"],
-        singularityimage=config["stansingularity"]
-    shell:
-        """
-        module unload python
-        module load singularity
-        singularity exec {params.singularityimage} \
-        Rscript R/CalculatesitedNdS-normal.R \
-            --patientinfo {input.oesophaguspatientinfo} \
-            --oesophagusdata {input.oesophagusdata} \
-            --oesophagusdnds {output.oesophagusdnds} \
-            --oesophagusdndsgenes {output.oesophagusdndsgenes} \
-            --hotspots {output.oesophagushotspots} \
-            --step {params.step} \
-            --minarea {params.minarea} \
-            --maxarea {params.maxarea}
-        """
+    singularity: "shub://marcjwilliams1/dnds-clonesize-R-container"
+    script: "../R/CalculatesitedNdS-normal.R"

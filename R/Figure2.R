@@ -7,50 +7,21 @@ library(forcats)
 library(ggforce)
 library(Hmisc)
 
-library(argparse)
-
-parser <- ArgumentParser(description = "Generate Final Figures")
-parser$add_argument('--figure', type='character',
-                    help="Outpute figure files")
-parser$add_argument('--suppfigures', type='character',
-                    help="Outpute figure files", nargs = "+", default = NULL)
-parser$add_argument('--oesophagusfitmissense', type='character',
-                    help="Fits for missense mutations oesophagus")
-parser$add_argument('--oesophagusfitnonsense', type='character',
-                    help="Fits for nonsense mutations oesophagus")
-parser$add_argument('--skinfitmissense', type='character',
-                    help="Fits for missense mutations oesophagus")
-parser$add_argument('--skinfitnonsense', type='character',
-                    help="Fits for nonsense mutations oesophagus")
-parser$add_argument('--oesophagusfitmissensepergene', type='character',
-                    help="Fits for missense mutations oesophagus per gene")
-parser$add_argument('--oesophagusfitnonsensepergene', type='character',
-                    help="Fits for nonsense mutations oesophagus per gene")
-parser$add_argument('--oesophagusfitneutral', type='character',
-                    help="Fits for neutral mutations oesophagus")
-parser$add_argument('--stemcellpower', type='character',
-                    help="Simulations for power to infer dynamics")
-parser$add_argument('--stemcellexamplefit', type='character',
-                    help="Example simulations fits")
-parser$add_argument('--singlepatientdnds', type='character',
-                    help="Single patient dn/ds in bins")
-args <- parser$parse_args()
-
 message("Generating Figure 2...")
 message("\t Reading in data...")
 
-dfnon <- read_csv(args$oesophagusfitnonsense, col_types = cols())
-dfmiss <- read_csv(args$oesophagusfitmissense, col_types = cols())
+dfnon <- read_csv(snakemake@input$oesophagusfitnonsense, col_types = cols())
+dfmiss <- read_csv(snakemake@input$oesophagusfitmissense, col_types = cols())
 
-dfnon.gene <- read_csv(args$oesophagusfitnonsensepergene, col_types = cols())
-dfmiss.gene <- read_csv(args$oesophagusfitmissensepergene, col_types = cols())
+dfnon.gene <- read_csv(snakemake@input$oesophagusfitnonsensepergene, col_types = cols())
+dfmiss.gene <- read_csv(snakemake@input$oesophagusfitmissensepergene, col_types = cols())
 
-dfneutral <- read_csv(args$oesophagusfitneutral, col_types = cols())
+dfneutral <- read_csv(snakemake@input$oesophagusfitneutral, col_types = cols())
 
-dfsim <- read.csv(args$stemcellexamplefit)
-dfpower <- read_csv(args$stemcellpower, col_types = cols())
+dfsim <- read.csv(snakemake@input$stemcellexamplefit)
+dfpower <- read_csv(snakemake@input$stemcellpower, col_types = cols())
 
-dfbins <- read_csv(args$singlepatientdnds) %>%
+dfbins <- read_csv(snakemake@input$singlepatientdnds) %>%
 mutate(A = medianbin)
 
 
@@ -224,7 +195,7 @@ message("Combine plots together...")
 figure2 <- plot_grid(figure2top, figure2bottom, ncol = 1)
 
 message("Save plot to file")
-save_plot(args$figure, figure2, base_height = 7, base_width = 12)
+save_plot(snakemake@output$figure, figure2, base_height = 7, base_width = 12)
 
 message("Plot single patient")
 
@@ -251,4 +222,4 @@ g2 <- dfbins %>%
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 g <- plot_grid(g1, g2)
-save_plot(filename = args$suppfigures[1], g, base_height = 6, base_width = 10)
+save_plot(filename = snakemake@output$suppfigures[1], g, base_height = 6, base_width = 10)
